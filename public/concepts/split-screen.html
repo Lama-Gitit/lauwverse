@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concept 4 — Split-Screen Takeover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Big+Shoulders+Display:ital,wght@0,800;0,900;1,900&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #03020E;
+    color: #F0F0F9;
+    font-family: 'JetBrains Mono', monospace;
+    height: 100vh;
+    overflow: hidden;
+    cursor: crosshair;
+  }
+  body::before {
+    content: "";
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(45,77,195,0.015) 3px, rgba(45,77,195,0.015) 6px);
+    pointer-events: none; z-index: 1000;
+  }
+
+  .split-container {
+    display: flex;
+    height: 100vh;
+    position: relative;
+  }
+
+  .split-side {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 64px 48px;
+    overflow: hidden;
+    transition: flex 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    text-decoration: none;
+    color: inherit;
+  }
+  .split-side:hover {
+    flex: 1.6;
+  }
+  .split-side:hover ~ .split-side,
+  .split-side:not(:hover) {
+    /* handled by flex */
+  }
+
+  .split-side canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .split-divider {
+    width: 1px;
+    background: rgba(105,125,235,0.25);
+    z-index: 10;
+    position: relative;
+  }
+  .split-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -4px;
+    width: 9px;
+    height: 48px;
+    transform: translateY(-50%);
+    background: rgba(105,125,235,0.15);
+    border: 1px solid rgba(105,125,235,0.3);
+  }
+
+  .side-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .side-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.35em;
+    color: #695DBE;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .side-label .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  .side-title {
+    font-family: 'Big Shoulders Display', Impact, sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 0.85;
+    font-size: clamp(3rem, 8vw, 6rem);
+    transition: transform 0.4s ease;
+  }
+  .split-side:hover .side-title {
+    transform: translateX(8px);
+  }
+
+  .side-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: #8278CB;
+    max-width: 320px;
+  }
+
+  .side-cta {
+    font-size: 0.6875rem;
+    letter-spacing: 0.3em;
+    color: #5344AC;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    transition: color 0.3s ease;
+  }
+  .split-side:hover .side-cta {
+    color: #697DEB;
+  }
+
+  .side-tags {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    z-index: 2;
+  }
+  .side-tags span {
+    font-size: 0.5625rem;
+    letter-spacing: 0.2em;
+    color: #695DBE;
+    padding: 4px 10px;
+    border: 1px solid rgba(105,125,235,0.2);
+    backdrop-filter: blur(4px);
+  }
+
+  /* color tints per side */
+  .side-kizuna::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(12,26,78,0.3) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .side-wolves::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(225deg, rgba(62,50,132,0.25) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+</style>
+</head>
+<body>
+
+<div class="split-container">
+
+  <!-- LEFT — KIZUNA -->
+  <a href="https://www.kizuna.gg" target="_blank" rel="noopener noreferrer" class="split-side side-kizuna">
+    <canvas id="kizuna-bg"></canvas>
+    <div class="side-tags"><span>SOCIAL AI</span><span>DESIGN</span></div>
+    <div class="side-content">
+      <div class="side-label"><span class="dot" style="background:#697DEB;box-shadow:0 0 8px rgba(105,125,235,0.8)"></span>ACTIVE_SYSTEM</div>
+      <div class="side-title" style="color:#F0F0F9">KIZUNA</div>
+      <p class="side-desc">Community intelligence platform. Discord-native signal processing and activation agency.</p>
+      <span class="side-cta">&gt; ENTER_KIZUNA &#8599;</span>
+    </div>
+  </a>
+
+  <div class="split-divider"></div>
+
+  <!-- RIGHT — WOLVES -->
+  <a href="https://www.wolves.co" target="_blank" rel="noopener noreferrer" class="split-side side-wolves">
+    <canvas id="wolves-bg"></canvas>
+    <div class="side-tags"><span>WEB3</span><span>CULTURE</span></div>
+    <div class="side-content">
+      <div class="side-label"><span class="dot" style="background:#5344AC;box-shadow:0 0 8px rgba(83,68,172,0.5)"></span>ARCHIVE</div>
+      <div class="side-title" style="color:#F0F0F9">WOLVES</div>
+      <p class="side-desc">Digital collective. Web3 culture, creative direction, and community-first product thinking.</p>
+      <span class="side-cta">&gt; ENTER_WOLVES &#8599;</span>
+    </div>
+  </a>
+
+</div>
+
+<script>
+// ── KIZUNA BG: rising connection lines ──
+(function() {
+  const canvas = document.getElementById('kizuna-bg');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    w = rect.width; h = rect.height;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const lines = Array.from({ length: 25 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    len: 30 + Math.random() * 80,
+    angle: -Math.PI / 2 + (Math.random() - 0.5) * 0.8,
+    speed: 0.0001 + Math.random() * 0.0003,
+    alpha: Math.random(),
+    phase: Math.random() * Math.PI * 2,
+  }));
+
+  function draw(t) {
+    requestAnimationFrame(draw);
+    ctx.clearRect(0, 0, w, h);
+    const time = t * 0.001;
+
+    for (const l of lines) {
+      l.y -= l.speed;
+      if (l.y < -0.1) { l.y = 1.1; l.x = Math.random(); }
+
+      const fade = Math.sin(l.phase + time * 0.5) * 0.5 + 0.5;
+      const x = l.x * w;
+      const y = l.y * h;
+
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + Math.cos(l.angle) * l.len, y + Math.sin(l.angle) * l.len);
+      ctx.strokeStyle = `rgba(105,125,235,${fade * 0.12})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(105,125,235,${fade * 0.25})`;
+      ctx.fill();
+    }
+  }
+  requestAnimationFrame(draw);
+})();
+
+// ── WOLVES BG: drifting diamond particles ──
+(function() {
+  const canvas = document.getElementById('wolves-bg');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    w = rect.width; h = rect.height;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = Array.from({ length: 35 }, () => ({
+    x: Math.random(), y: Math.random(),
+    size: 2 + Math.random() * 5,
+    vy: -(0.0001 + Math.random() * 0.0004),
+    vx: (Math.random() - 0.5) * 0.0002,
+    phase: Math.random() * Math.PI * 2,
+    rotation: Math.random() * Math.PI,
+    rotSpeed: (Math.random() - 0.5) * 0.01,
+  }));
+
+  function drawDiamond(ctx, x, y, r, rot) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    ctx.beginPath();
+    ctx.moveTo(0, -r);
+    ctx.lineTo(r * 0.6, 0);
+    ctx.lineTo(0, r);
+    ctx.lineTo(-r * 0.6, 0);
+    ctx.closePath();
+    ctx.restore();
+  }
+
+  function draw(t) {
+    requestAnimationFrame(draw);
+    ctx.clearRect(0, 0, w, h);
+    const time = t * 0.001;
+
+    for (const p of particles) {
+      p.y += p.vy;
+      p.x += p.vx + Math.sin(time * 0.3 + p.phase) * 0.00005;
+      p.rotation += p.rotSpeed;
+
+      if (p.y < -0.05) {
+        p.y = 1.05;
+        p.x = Math.random();
+      }
+
+      const fade = 0.3 + 0.3 * Math.sin(p.phase + time * 0.4);
+
+      drawDiamond(ctx, p.x * w, p.y * h, p.size, p.rotation);
+      ctx.fillStyle = `rgba(156,149,216,${fade * 0.2})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(156,149,216,${fade * 0.15})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  }
+  requestAnimationFrame(draw);
+})();
+</script>
+
+</body>
+</html>

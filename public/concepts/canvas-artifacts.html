@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concept 3 — Canvas Artifact Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Big+Shoulders+Display:wght@800;900&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #03020E;
+    color: #F0F0F9;
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+    cursor: crosshair;
+  }
+  body::before {
+    content: "";
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(45,77,195,0.015) 3px, rgba(45,77,195,0.015) 6px);
+    pointer-events: none; z-index: 1000;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: #8278CB;
+    margin-bottom: 48px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(105,125,235,0.15);
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    width: 100%;
+    max-width: 800px;
+    background: rgba(105,125,235,0.15);
+    border: 1px solid rgba(105,125,235,0.15);
+  }
+
+  .artifact-card {
+    background: #03020E;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    position: relative;
+    transition: background 0.3s ease;
+  }
+  .artifact-card:hover {
+    background: rgba(25,19,62,0.3);
+  }
+  .artifact-card:hover canvas {
+    opacity: 1;
+  }
+  .artifact-card:hover .card-enter {
+    color: #697DEB;
+  }
+
+  .card-canvas-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+  }
+  .card-canvas-wrap canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.75;
+    transition: opacity 0.5s ease;
+  }
+  .card-canvas-label {
+    position: absolute;
+    bottom: 16px;
+    left: 20px;
+    font-family: 'Big Shoulders Display', Impact, sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+    color: #F0F0F9;
+    z-index: 2;
+    text-shadow: 0 2px 20px rgba(3,2,14,0.8);
+  }
+
+  .card-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+  .card-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 300;
+    line-height: 1.6;
+    color: #8278CB;
+  }
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(105,125,235,0.1);
+  }
+  .card-tags {
+    display: flex;
+    gap: 6px;
+  }
+  .card-tags span {
+    font-size: 0.5625rem;
+    letter-spacing: 0.2em;
+    color: #695DBE;
+    padding: 3px 8px;
+    border: 1px solid rgba(105,125,235,0.2);
+  }
+  .card-enter {
+    font-size: 0.6875rem;
+    letter-spacing: 0.25em;
+    color: #5344AC;
+    transition: color 0.3s ease;
+  }
+</style>
+</head>
+<body>
+
+<div class="section-label">LAB_ARTIFACTS // GENERATIVE_INDEX</div>
+
+<div class="card-grid">
+
+  <!-- KIZUNA -->
+  <a href="https://www.kizuna.gg" target="_blank" rel="noopener noreferrer" class="artifact-card">
+    <div class="card-canvas-wrap">
+      <canvas id="kizuna-canvas"></canvas>
+      <div class="card-canvas-label">KIZUNA</div>
+    </div>
+    <div class="card-info">
+      <p class="card-desc">Community intelligence platform. Discord-native signal processing and activation.</p>
+    </div>
+    <div class="card-footer">
+      <div class="card-tags"><span>SOCIAL AI</span><span>DESIGN</span></div>
+      <span class="card-enter">ENTER &#8599;</span>
+    </div>
+  </a>
+
+  <!-- WOLVES -->
+  <a href="https://www.wolves.co" target="_blank" rel="noopener noreferrer" class="artifact-card">
+    <div class="card-canvas-wrap">
+      <canvas id="wolves-canvas"></canvas>
+      <div class="card-canvas-label">WOLVES</div>
+    </div>
+    <div class="card-info">
+      <p class="card-desc">Digital collective. Web3 culture, creative direction, and community-first thinking.</p>
+    </div>
+    <div class="card-footer">
+      <div class="card-tags"><span>WEB3</span><span>CULTURE</span></div>
+      <span class="card-enter">ENTER &#8599;</span>
+    </div>
+  </a>
+
+</div>
+
+<script>
+// ── KIZUNA: Network graph — nodes connected by lines, pulsing ──
+(function() {
+  const canvas = document.getElementById('kizuna-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    w = rect.width; h = rect.height;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const nodes = Array.from({ length: 40 }, () => ({
+    x: Math.random(), y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.0003,
+    vy: (Math.random() - 0.5) * 0.0003,
+    r: 1.5 + Math.random() * 2.5,
+    phase: Math.random() * Math.PI * 2,
+  }));
+
+  function draw(t) {
+    requestAnimationFrame(draw);
+    ctx.clearRect(0, 0, w, h);
+
+    // update positions
+    for (const n of nodes) {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > 1) n.vx *= -1;
+      if (n.y < 0 || n.y > 1) n.vy *= -1;
+    }
+
+    // draw connections
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = (nodes[i].x - nodes[j].x) * w;
+        const dy = (nodes[i].y - nodes[j].y) * h;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          const alpha = (1 - dist / 100) * 0.3;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x * w, nodes[i].y * h);
+          ctx.lineTo(nodes[j].x * w, nodes[j].y * h);
+          ctx.strokeStyle = `rgba(105,125,235,${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // draw nodes
+    const time = t * 0.001;
+    for (const n of nodes) {
+      const pulse = 0.5 + 0.5 * Math.sin(n.phase + time * 0.8);
+      ctx.beginPath();
+      ctx.arc(n.x * w, n.y * h, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(105,125,235,${0.3 + pulse * 0.5})`;
+      ctx.fill();
+
+      if (n.r > 3) {
+        ctx.beginPath();
+        ctx.arc(n.x * w, n.y * h, n.r + 4 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(105,125,235,${pulse * 0.1})`;
+        ctx.fill();
+      }
+    }
+  }
+  requestAnimationFrame(draw);
+})();
+
+// ── WOLVES: Pack movement — particles moving in coordinated swarms ──
+(function() {
+  const canvas = document.getElementById('wolves-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    w = rect.width; h = rect.height;
+    ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const wolves = Array.from({ length: 60 }, (_, i) => {
+    const pack = Math.floor(i / 15);
+    const cx = 0.2 + pack * 0.25;
+    const cy = 0.3 + (pack % 2) * 0.3;
+    return {
+      x: cx + (Math.random() - 0.5) * 0.15,
+      y: cy + (Math.random() - 0.5) * 0.15,
+      pack,
+      speed: 0.0004 + Math.random() * 0.0006,
+      angle: Math.random() * Math.PI * 2,
+      size: 1 + Math.random() * 2,
+      trail: [],
+    };
+  });
+
+  const packTargets = [
+    { x: 0.3, y: 0.4 }, { x: 0.7, y: 0.6 },
+    { x: 0.5, y: 0.3 }, { x: 0.6, y: 0.7 },
+  ];
+
+  function draw(t) {
+    requestAnimationFrame(draw);
+    ctx.clearRect(0, 0, w, h);
+    const time = t * 0.001;
+
+    // update pack targets slowly
+    for (let p = 0; p < 4; p++) {
+      packTargets[p].x = 0.3 + 0.4 * Math.sin(time * 0.15 + p * 1.5);
+      packTargets[p].y = 0.3 + 0.3 * Math.cos(time * 0.12 + p * 2.0);
+    }
+
+    for (const wolf of wolves) {
+      const target = packTargets[wolf.pack];
+      const dx = target.x - wolf.x;
+      const dy = target.y - wolf.y;
+      const targetAngle = Math.atan2(dy, dx);
+
+      // smooth steering
+      let angleDiff = targetAngle - wolf.angle;
+      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+      wolf.angle += angleDiff * 0.03;
+
+      wolf.x += Math.cos(wolf.angle) * wolf.speed;
+      wolf.y += Math.sin(wolf.angle) * wolf.speed;
+
+      // keep trail
+      wolf.trail.push({ x: wolf.x, y: wolf.y });
+      if (wolf.trail.length > 12) wolf.trail.shift();
+
+      // draw trail
+      for (let i = 0; i < wolf.trail.length - 1; i++) {
+        const alpha = (i / wolf.trail.length) * 0.15;
+        ctx.beginPath();
+        ctx.arc(wolf.trail[i].x * w, wolf.trail[i].y * h, wolf.size * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(83,68,172,${alpha})`;
+        ctx.fill();
+      }
+
+      // draw wolf
+      ctx.beginPath();
+      ctx.arc(wolf.x * w, wolf.y * h, wolf.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(156,149,216,0.7)`;
+      ctx.fill();
+    }
+  }
+  requestAnimationFrame(draw);
+})();
+</script>
+
+</body>
+</html>
