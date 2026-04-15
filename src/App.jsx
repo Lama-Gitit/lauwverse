@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import './app.css';
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // FOUNDATION — Design tokens, color palette, type scale, theme mapping
@@ -177,23 +178,190 @@ const THEMES = {
   },
 };
 
+// Convert camelCase theme keys to --kebab-case CSS custom properties
+const toKebab = (s) => s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+const themeToVars = (t) => {
+  const vars = {};
+  for (const [key, val] of Object.entries(t)) {
+    vars[`--${toKebab(key)}`] = val;
+  }
+  // Expose bg with alpha for backdrop blur effects
+  vars['--bg-alpha'] = alpha(t.bg, 0.85);
+  return vars;
+};
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENTS — Reusable UI primitives
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ─── TAG (category label, reusable across all sections) ─────────────────────
-const Tag = ({ children, t, size = 'sm' }) => (
-  <span style={{
-    ...TYPE.mono.sm,
-    fontSize: size === 'sm' ? '0.5625rem' : '0.625rem',
-    letterSpacing: '0.2em',
-    color: t.accentLabel,
-    padding: size === 'sm' ? '3px 8px' : '4px 12px',
-    border: `1px solid ${t.border}`,
-    whiteSpace: 'nowrap',
-  }}>{children}</span>
+// Sizes: sm (default), md, lg — all use mono.sm base with size-specific overrides
+const Tag = ({ children, t, size = 'sm', onClick }) => (
+  <span className={`tag tag--${size}${onClick ? ' tag--clickable' : ''}`}
+    style={{ '--tag-color': t.accentLabel }}
+    onClick={onClick}
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+  >{children}</span>
 );
+
+// ─── TAG GLOSSARY DATA ──────────────────────────────────────────────────────
+const TAG_GLOSSARY = {
+  'CULTURE': {
+    title: 'Culture',
+    tagline: 'The invisible operating system.',
+    body: 'Culture is the layer that cannot be shipped in a deploy. It is how a community talks, what it values, how decisions get made. I pay attention to culture because it decides whether anything you build actually sticks. Technology is the vehicle. Culture is the road.',
+  },
+  'SOCIAL AI': {
+    title: 'Social AI',
+    tagline: 'Where behavior meets the machine.',
+    body: 'Social AI is the space where human behavior and artificial intelligence actually touch. Not AI that replaces people, but AI that understands how groups think, talk, and connect. I care about this layer because it decides whether technology pulls us closer or pushes us apart.',
+  },
+  'DESIGN': {
+    title: 'Design',
+    tagline: 'Clarity you can feel.',
+    body: 'Design is not decoration. It is the quiet decision about what matters and what gets cut. Good design removes friction you never knew was there. I treat design as a behavioral tool, not a visual one. Underneath that sit the rules: balance, contrast, emphasis, movement, proportion, repetition, rhythm, and unity. They are how visual elements get arranged into something organized, clear, and easy to feel. Knowing them is the craft. Knowing when to break them is the taste.',
+  },
+  'WEB3': {
+    title: 'Web3',
+    tagline: 'Ownership, rewritten.',
+    body: 'Web3 is not about tokens or charts. It is about who gets to own what they help build. I pay attention to it because the best parts of it, real contribution and shared stake, line up with how healthy communities already work. In the age of AI, that matters even more. Ownership, provenance, and knowing what is real become harder every week, and the tools that prove authorship and origin stop being optional.',
+  },
+  'VIBE CODE': {
+    title: 'Vibe Code',
+    tagline: 'Building by feel, shipping with intent.',
+    body: 'Vibe code is what happens when you stop overthinking the stack and start moving with the idea. Fast, intuitive, a little messy, and closer to how people actually create. I use it to turn half thoughts into working things before the doubt catches up.',
+  },
+  'VIBE_CODE': {
+    title: 'Vibe Code',
+    tagline: 'Building by feel, shipping with intent.',
+    body: 'Vibe code is what happens when you stop overthinking the stack and start moving with the idea. Fast, intuitive, a little messy, and closer to how people actually create. I use it to turn half thoughts into working things before the doubt catches up.',
+  },
+  'BUILD': {
+    title: 'Build',
+    tagline: 'Made, not talked about.',
+    body: 'Build means something actually exists now that did not before. A prototype, a flow, a system, a small thing that works. I tag posts with build when the focus is making, not planning.',
+  },
+  'READING': {
+    title: 'Reading',
+    tagline: 'Input before output.',
+    body: 'Reading is the quiet work behind everything else. Books, essays, research, long threads. I tag things as reading when the point is what went in, not what came out. You cannot think clearly on an empty shelf.',
+  },
+  'THINKING': {
+    title: 'Thinking',
+    tagline: 'Working it out loud.',
+    body: 'Thinking is the space before the answer. Half formed ideas, open questions, notes to myself. I tag posts with thinking when they are honest drafts of reasoning, not conclusions dressed up as certainty.',
+  },
+  'AI': {
+    title: 'AI',
+    tagline: 'The tool we are learning to live with.',
+    body: 'AI is not the future. It is the present we are still adjusting to. I lean in early because waiting for change makes it harder to catch up. I would rather adapt while the ground is still moving than try to learn it once it has settled. I write about AI from the user side, not the hype side, because what matters is how it changes the way real people work, decide, and connect.',
+  },
+  'PRODUCT': {
+    title: 'Product',
+    tagline: 'Where ideas meet people.',
+    body: 'Product is the moment an idea stops being an idea and starts having users. It is the decisions about what to build, what to cut, and what to hold the line on. I care about product because it is where taste and behavior collide.',
+  },
+  'WCAG': {
+    title: 'WCAG',
+    tagline: 'Design that leaves no one behind.',
+    body: 'WCAG stands for the Web Content Accessibility Guidelines. It is the baseline for making sure the web works for people with different abilities, devices, and situations. I treat it as a floor, not a ceiling. Accessible design is just good design with fewer excuses.',
+  },
+  'ENTERPRISE': {
+    title: 'Enterprise',
+    tagline: 'Complexity, made usable.',
+    body: 'Enterprise is the world of dashboards, workflows, and tools built for people whose job depends on them. Insurance, banks, internal platforms, anything where the data is dense and the stakes are real. I like this space because there is nowhere to hide. If the design is bad, the user feels it every single day.',
+  },
+  'BEHAVIOR': {
+    title: 'Behavior',
+    tagline: 'The why behind every click.',
+    body: 'Behavior is the real subject of UX and UI design. Everything else is just surface. I lean on behavioral & persuasion models like Myers-Briggs Type Indicator, Cialdini persuasion, Fogg Behavior & Hook Model, because they explain why people actually do what they do, not what you hope they will. Good design respects behavior. Great design shapes it.',
+  },
+  'DESIGN SYSTEMS': {
+    title: 'Design Systems',
+    tagline: 'Consistency as a thinking tool.',
+    body: 'Design systems are how I keep quality up without slowing work down. I am a systems thinker, so building on shared components, colors, and rules fits how I work. A strong system also forces clarity: if you want to add something new, you have to explain why. That constraint is the point, not the problem.',
+  },
+  // Tools
+  'CLAUDE': {
+    title: 'Claude',
+    tagline: 'The daily driver.',
+    body: 'Claude is the AI model I use most. In the early days I picked it for writing because the tone of voice felt more human than anything else. Now it is also my daily coding driver. Most of what I write, structure, or ship passes through Claude at some point.',
+    url: 'https://claude.ai',
+  },
+  'FIGMA': {
+    title: 'Figma',
+    tagline: 'Where the idea becomes a thing you can see.',
+    body: 'Figma is where I draft, shape, and refine everything user experience and visual before it becomes code. It is the middle step between thinking and building. Fast enough to keep up with the idea, precise enough to respect it.',
+    url: 'https://figma.com',
+  },
+  'VERCEL': {
+    title: 'Vercel',
+    tagline: 'Ship it, see it live.',
+    body: 'Vercel is where the work goes public. I use it because it removes the gap between writing code and putting something in front of real people. Less friction between the idea and the world.',
+    url: 'https://vercel.com',
+  },
+  'PERPLEXITY': {
+    title: 'Perplexity',
+    tagline: 'Answers with receipts.',
+    body: 'Perplexity is where I go when I need real information with sources, not a confident guess. I also use it as a browser companion, which comes with the subscription, so it sits next to whatever I am reading and answers in context. The part I like most: I can pick which model answers, depending on the question.',
+    url: 'https://perplexity.ai',
+  },
+  'GEMINI': {
+    title: 'Gemini',
+    tagline: 'Deep research, long context.',
+    body: 'Gemini is my main driver for deep research. It covers ground fast and holds long context well, which makes it the right tool when I need to understand a space, not just skim it. I pair it with Claude when I want to turn all that raw text into something interactive I can actually see and think with. As a visual thinker, that step matters.',
+    url: 'https://gemini.google.com',
+  },
+  'AFFINITY': {
+    title: 'Affinity',
+    tagline: 'Precision without the subscription tax.',
+    body: 'Affinity is where I do the heavier visual work. Vector, layout, photo, all in one place, owned outright. I use it when I need control that browser tools cannot give me and when the work deserves something sharper than a quick export.',
+    url: 'https://affinity.serif.com',
+  },
+  'LOVABLE': {
+    title: 'Lovable',
+    tagline: 'From prompt to working product.',
+    body: 'Lovable is what I reach for when I want to productize or prototype an idea fast without the usual setup tax. I use it less now that Claude handles more of that work, but it still earns its place when I want something running in minutes, not hours.',
+    url: 'https://lovable.dev',
+  },
+};
+
+// Normalize tag key for glossary lookup
+const glossaryKey = (tag) => {
+  const upper = tag.toUpperCase();
+  return TAG_GLOSSARY[upper] ? upper : Object.keys(TAG_GLOSSARY).find(k => k === upper) || upper;
+};
+
+// ─── OFF-CANVAS GLOSSARY PANEL ──────────────────────────────────────────────
+const GlossaryPanel = ({ tag, t, onClose }) => {
+  const entry = TAG_GLOSSARY[glossaryKey(tag)];
+  if (!entry) return null;
+
+  return (
+    <>
+      <div className="glossary-overlay" onClick={onClose} />
+      <aside className="glossary-panel">
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:40 }}>
+          <Tag t={t} size="md">{tag}</Tag>
+          <button className="glossary-panel__close" onClick={onClose}
+            style={{ ...TYPE.mono.sm, letterSpacing:'0.3em', color:t.textMuted, background:'none', border:'none', cursor:'crosshair' }}
+          >CLOSE ×</button>
+        </div>
+        <h2 style={{ ...TYPE.heading.lg, color:t.text, marginBottom:12 }}>{entry.title}</h2>
+        <p style={{ ...TYPE.body.intro, color:t.accent, marginBottom:32 }}>{entry.tagline}</p>
+        <p style={{ ...TYPE.body.md, color:t.textSecondary }}>{entry.body}</p>
+        {entry.url && (
+          <a href={entry.url} target="_blank" rel="noopener noreferrer"
+            className="glossary-panel__link"
+            style={{ ...TYPE.mono.sm, letterSpacing:'0.4em', color:t.accentLabel, marginTop:40, display:'inline-flex', alignItems:'center', gap:10, textDecoration:'none' }}
+          >{entry.title.toUpperCase()} <ArrowUpRight size={12} /></a>
+        )}
+      </aside>
+    </>
+  );
+};
 
 // ─── STATUS BADGE (static indicator for live/archive/version states) ────────
 const StatusBadge = ({ status, t, active = false }) => (
@@ -213,7 +381,7 @@ const StatusBadge = ({ status, t, active = false }) => (
 );
 
 // ─── SECTION LABEL ───────────────────────────────────────────────────────────
-const SectionLabel = ({ filled, outline, t }) => {
+const SectionLabel = ({ filled, outline, tagline, t }) => {
   const baseStyle = {
     fontFamily: 'Big Shoulders Display, Impact, sans-serif',
     fontSize: '2.5rem',
@@ -225,26 +393,59 @@ const SectionLabel = ({ filled, outline, t }) => {
     display: 'block',
   };
   return (
-    <div style={{ marginBottom: 48, borderBottom: `1px solid ${t.border}`, paddingBottom: 12 }}>
-      <h2 style={{ ...baseStyle, color: t.text }}>{filled}</h2>
-      <h2 style={{ ...baseStyle, color: 'transparent', WebkitTextStroke: t.stroke }}>{outline}</h2>
+    <div className="section-label">
+      <div className="section-label__titles">
+        <h2 style={{ ...baseStyle, color: t.text }}>{filled}</h2>
+        <h2 style={{ ...baseStyle, color: 'transparent', WebkitTextStroke: t.stroke }}>{outline}</h2>
+      </div>
+      {tagline && (
+        <p className="section-label__tagline" style={{ ...TYPE.body.md, color: t.textMuted }}>{tagline}</p>
+      )}
     </div>
   );
 };
 
 // ─── HERO SCENE (canvas) ──────────────────────────────────────────────────────
-const HeroScene = ({ scrollY, theme, density = 300 }) => {
+const HeroScene = ({ scrollY, theme, density = 300, fogLevel = 80, fogTopOpacity = 0, fogBottomOpacity = 50 }) => {
   const canvasRef = useRef(null);
   const rafRef    = useRef(null);
   const stateRef  = useRef(null);
 
   // Store mutable props in refs so the render loop reads them live
   // without the useEffect needing to restart
-  const propsRef = useRef({ density });
-  propsRef.current = { density };
+  const propsRef = useRef({ density, fogLevel, fogTopOpacity, fogBottomOpacity });
+  propsRef.current = { density, fogLevel, fogTopOpacity, fogBottomOpacity };
+
+  // Stars and particles are created once and persist across density changes
+  const starsRef = useRef(null);
+  const particlesRef = useRef(null);
+  if (!starsRef.current) {
+    starsRef.current = Array.from({ length: 180 }, () => ({
+      x: Math.random(),
+      y: Math.random() * 0.55,
+      r: Math.random() < 0.08 ? 1.4 + Math.random() * 0.8 : Math.random() * 1.0 + 0.15,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.5 + 0.2,
+      bloom: Math.random() < 0.12,
+    }));
+  }
+  if (!particlesRef.current) {
+    particlesRef.current = Array.from({ length: 30 }, (_, i) => ({
+      x: Math.random(),
+      y: 0.3 + Math.random() * 0.4,
+      vy: -(0.00015 + Math.random() * 0.0006),
+      vx: (Math.random() - 0.5) * 0.00012,
+      size: 1 + Math.random() * (i % 5 === 0 ? 4 : 2.5),
+      alpha: Math.random(),
+      phase: Math.random() * Math.PI * 2,
+      wobble: 0.0001 + Math.random() * 0.0002,
+    }));
+  }
 
   useEffect(() => {
     const isDark = theme === 'midnight';
+    const stars = starsRef.current;
+    const particles = particlesRef.current;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -262,27 +463,7 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
     const W = () => canvas.offsetWidth;
     const H = () => canvas.offsetHeight;
 
-    // ── stars ────────────────────────────────────────────────────────────────
-    const stars = Array.from({ length: 180 }, () => ({
-      x: Math.random(),
-      y: Math.random() * 0.55,
-      r: Math.random() < 0.08 ? 1.4 + Math.random() * 0.8 : Math.random() * 1.0 + 0.15,
-      phase: Math.random() * Math.PI * 2,
-      speed: Math.random() * 0.5 + 0.2,
-      bloom: Math.random() < 0.12,
-    }));
-
-    // ── particles ────────────────────────────────────────────────────────────
-    const particles = Array.from({ length: 30 }, (_, i) => ({
-      x: Math.random(),
-      y: 0.3 + Math.random() * 0.4,
-      vy: -(0.00015 + Math.random() * 0.0006),
-      vx: (Math.random() - 0.5) * 0.00012,
-      size: 1 + Math.random() * (i % 5 === 0 ? 4 : 2.5),
-      alpha: Math.random(),
-      phase: Math.random() * Math.PI * 2,
-      wobble: 0.0001 + Math.random() * 0.0002,
-    }));
+    // stars and particles from refs (persist across density changes)
 
     // ── seeded RNG — stable per-layer across frames ──────────────────────────
     const seededRng = (seed) => {
@@ -353,26 +534,19 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
       const w = W(), h = H();
       ctx.clearRect(0, 0, w, h);
 
-      // ── sky gradient — deep navy top, brighter blue-purple at horizon ──
+      // ── sky ──
       if (isDark) {
+        // gradient: deep top → brighter blue near horizon → dark at bottom
         const sky = ctx.createLinearGradient(0, 0, 0, h);
-        sky.addColorStop(0,    PALETTE.jaguar[950]);         // deep top
-        sky.addColorStop(0.45, PALETTE.downriver[700]);      // transition to blue
-        sky.addColorStop(0.65, PALETTE.downriver[600]);      // horizon zone
-        sky.addColorStop(0.85, PALETTE.jaguar[900]);         // below treeline
-        sky.addColorStop(1,    PALETTE.jaguar[950]);         // bottom
+        sky.addColorStop(0,    PALETTE.jaguar[950]);
+        sky.addColorStop(0.45, PALETTE.downriver[700]);
+        sky.addColorStop(0.62, PALETTE.downriver[600]);
+        sky.addColorStop(0.80, PALETTE.jaguar[900]);
+        sky.addColorStop(1,    PALETTE.jaguar[950]);
         ctx.fillStyle = sky;
-      } else {
-        const sky = ctx.createLinearGradient(0, 0, 0, h);
-        sky.addColorStop(0,    PALETTE.jaguar[100]);
-        sky.addColorStop(0.5,  PALETTE.jaguar[50]);
-        sky.addColorStop(1,    PALETTE.jaguar[100]);
-        ctx.fillStyle = sky;
-      }
-      ctx.fillRect(0, 0, w, h);
+        ctx.fillRect(0, 0, w, h);
 
-      // ── horizon glow — behind the treeline ──
-      if (isDark) {
+        // horizon glow — bright bloom behind the treetops
         const glow = ctx.createRadialGradient(w * 0.5, h * 0.65, 0, w * 0.5, h * 0.65, w * 0.55);
         glow.addColorStop(0,   alpha(PALETTE.downriver[500], 0.30));
         glow.addColorStop(0.3, alpha(PALETTE.jaguar[700], 0.18));
@@ -387,10 +561,8 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
         ctx.fillStyle = glow2;
         ctx.fillRect(0, 0, w, h);
       } else {
-        const glow = ctx.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, w * 0.5);
-        glow.addColorStop(0,   alpha(PALETTE.downriver[400], 0.08));
-        glow.addColorStop(1,   'transparent');
-        ctx.fillStyle = glow;
+        // flat white — no gradient, no glow, no line
+        ctx.fillStyle = PALETTE.jaguar[50];
         ctx.fillRect(0, 0, w, h);
       }
 
@@ -455,19 +627,22 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
         ctx.restore();
       }
 
-      // ground fog — solid bg covers tree bases seamlessly
+      // ground fog — reads live from propsRef
       const bgColor = isDark ? PALETTE.jaguar[950] : PALETTE.jaguar[50];
-      const fog = ctx.createLinearGradient(0, h * 0.82, 0, h);
-      fog.addColorStop(0,   'transparent');
-      fog.addColorStop(0.25, alpha(bgColor, 0.50));
-      fog.addColorStop(0.5,  alpha(bgColor, 0.85));
-      fog.addColorStop(0.7,  bgColor);
-      fog.addColorStop(1,    bgColor);
+      const p = propsRef.current;
+      const fogStart = p.fogLevel / 100;
+      const topAlpha = p.fogTopOpacity / 100;
+      const botAlpha = p.fogBottomOpacity / 100;
+      const fog = ctx.createLinearGradient(0, h * fogStart, 0, h);
+      fog.addColorStop(0, 'transparent');
+      fog.addColorStop(0.3, alpha(bgColor, topAlpha));
+      fog.addColorStop(0.7, alpha(bgColor, botAlpha));
+      fog.addColorStop(1, bgColor);
       ctx.fillStyle = fog;
-      ctx.fillRect(0, h * 0.82, w, h * 0.18);
-      // solid bar at very bottom — no gaps
+      ctx.fillRect(0, 0, w, h);
+      // solid fill at very bottom
       ctx.fillStyle = bgColor;
-      ctx.fillRect(0, h * 0.95, w, h * 0.05);
+      ctx.fillRect(0, h * 0.95, w, h * 0.05 + 1);
     };
 
     rafRef.current = requestAnimationFrame(render);
@@ -531,8 +706,8 @@ const DesignSystem = ({ t, onBack }) => {
 
   // Palette scales (50→950)
   const paletteScales = [
-    { name: 'DOWNRIVER — BLUE',   steps: Object.entries(PALETTE.downriver).map(([step, hex]) => ({ step, hex })) },
-    { name: 'JAGUAR — PURPLE',  steps: Object.entries(PALETTE.jaguar).map(([step, hex]) => ({ step, hex })) },
+    { name: 'DOWNRIVER : BLUE',   steps: Object.entries(PALETTE.downriver).map(([step, hex]) => ({ step, hex })) },
+    { name: 'JAGUAR : PURPLE',  steps: Object.entries(PALETTE.jaguar).map(([step, hex]) => ({ step, hex })) },
   ];
 
   // Theme token mapping
@@ -570,7 +745,7 @@ const DesignSystem = ({ t, onBack }) => {
   );
 
   return (
-    <div style={{ maxWidth:960, margin:'0 auto', padding:'160px 24px 160px', borderLeft:`1px solid ${t.border}`, borderRight:`1px solid ${t.border}` }}>
+    <div style={{ maxWidth:960, margin:'0 auto', padding:'160px 24px 160px' }}>
 
       {/* ── PAGE HEADER ── */}
       <div style={{ marginBottom:112, display:'flex', flexDirection:'column', gap:8 }}>
@@ -581,7 +756,7 @@ const DesignSystem = ({ t, onBack }) => {
         <h1 style={{ fontSize:'clamp(3.5rem,10vw,7.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:'transparent', WebkitTextStroke:t.stroke, lineHeight:0.85 }}>BRAND</h1>
         <h1 style={{ fontSize:'clamp(3.5rem,10vw,7.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:t.text, lineHeight:0.85 }}>OPERATING<br/>SYSTEM.</h1>
         <p style={{ ...μ(t.textMuted, { fontSize:12, lineHeight:2 }), maxWidth:480, marginTop:32 }}>
-          Visual language / token library / interactive primitives —<br/>the atoms that compose lauwverse.
+          Visual language / token library / interactive primitives.<br/>The atoms that compose lauwverse.
         </p>
       </div>
 
@@ -650,7 +825,7 @@ const DesignSystem = ({ t, onBack }) => {
 
         {/* Headings scale */}
         <div style={{ marginBottom:56 }}>
-          <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>HEADINGS SCALE — SYNE</span>
+          <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>HEADINGS SCALE : SYNE</span>
           <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
             {headingScale.map((item, i, arr) => (
               <div key={item.name} style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', padding:'20px 24px', borderBottom: i < arr.length-1 ? `1px solid ${t.border}` : 'none', flexWrap:'wrap', gap:8 }}>
@@ -663,7 +838,7 @@ const DesignSystem = ({ t, onBack }) => {
 
         {/* Body scale */}
         <div style={{ marginBottom:56 }}>
-          <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>BODY SCALE — INTER</span>
+          <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>BODY SCALE : INTER</span>
           <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
             {bodyScale.map((item, i, arr) => (
               <div key={item.name} style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', padding:'16px 24px', borderBottom: i < arr.length-1 ? `1px solid ${t.border}` : 'none', flexWrap:'wrap', gap:8 }}>
@@ -679,7 +854,7 @@ const DesignSystem = ({ t, onBack }) => {
 
         {/* Mono scale */}
         <div>
-          <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>MONO SCALE — JETBRAINS MONO</span>
+          <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>MONO SCALE : JETBRAINS MONO</span>
           <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
             {monoScale.map((item, i, arr) => (
               <div key={item.name} style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', padding:'16px 24px', borderBottom: i < arr.length-1 ? `1px solid ${t.border}` : 'none', flexWrap:'wrap', gap:8 }}>
@@ -751,82 +926,231 @@ const DesignSystem = ({ t, onBack }) => {
         </div>
       </section>
 
-      {/* ── 03 INTERACTIVE PRIMITIVES ── */}
-      <section style={{ marginBottom:64 }}>
-        <SectionHeader num="03" title="COMPONENTS // PRIMITIVES" sub="Buttons + Links" />
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
+      {/* ── 03 TAGS ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="03" title="COMPONENTS // TAGS" sub="SM · MD · LG : Default + Hover" />
+
+        {/* Tag sizes — full width showcase */}
+        <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
+          {[
+            { size: 'sm', label: 'TAG / SM', desc: '0.5625rem · 3px 8px. Card footers, metadata, lineage', examples: ['SOCIAL AI', 'DESIGN', 'VIBE_CODE', 'WCAG'] },
+            { size: 'md', label: 'TAG / MD', desc: '0.625rem · 4px 12px. Signal badges, process tools, filters', examples: ['BUILD', 'READING', 'THINKING', 'CLAUDE'] },
+            { size: 'lg', label: 'TAG / LG', desc: '0.75rem · 5px 14px. Prominent labels, standalone usage', examples: ['AI', 'PRODUCT', 'WEB3'] },
+          ].map((row, i, arr) => (
+            <div key={row.size} style={{ display:'grid', gridTemplateColumns:'200px 1fr', borderBottom: i < arr.length - 1 ? `1px solid ${t.border}` : 'none' }}>
+              <div style={{ padding:'28px 24px', borderRight:`1px solid ${t.border}`, display:'flex', flexDirection:'column', justifyContent:'center', gap:6 }}>
+                <span style={μ(t.accentLabel)}>{row.label}</span>
+                <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:10, color:t.textFaint, letterSpacing:'0.1em', textTransform:'none', lineHeight:1.6 }}>{row.desc}</span>
+              </div>
+              <div style={{ padding:'28px 24px', display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
+                {row.examples.map(ex => (
+                  <Tag key={ex} t={t} size={row.size}>{ex}</Tag>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tag hover behaviour note */}
+        <div style={{ marginTop:16, display:'flex', alignItems:'center', gap:12 }}>
+          <span style={μ(t.textFaint, { fontSize:10 })}>HOVER</span>
+          <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:10, color:t.textFaint, letterSpacing:'0.08em', textTransform:'none' }}>border → accent · color → accentSecondary</span>
+        </div>
+      </section>
+
+      {/* ── 04 BUTTONS & LINKS ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="04" title="COMPONENTS // ACTIONS" sub="Buttons · Links · Navigation" />
+
+        {/* Buttons — state matrix */}
+        <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
           {[
             {
               label: 'PRIMARY_CTA',
-              desc: 'Hero action — bold bottom border accent',
-              element: <button style={{ ...β(t.text), background:'none', border:'none', borderBottom:`2px solid ${t.accent}`, paddingBottom:4, cursor:'crosshair' }}>DISCOVER</button>,
+              desc: 'Hero action. Bold accent underline',
+              states: [
+                { name: 'DEFAULT', el: <button style={{ ...β(t.text), background:'none', border:'none', borderBottom:`2px solid ${t.accent}`, paddingBottom:4, cursor:'crosshair' }}>DISCOVER</button> },
+                { name: 'HOVER', el: <button style={{ ...β(t.accentSecondary), background:'none', border:'none', borderBottom:`2px solid ${t.accentSecondary}`, paddingBottom:4, cursor:'crosshair' }}>DISCOVER</button> },
+              ],
             },
             {
               label: 'SECONDARY_LINK',
-              desc: 'Subdued — dim accent underline, fades in on hover',
-              element: <button style={{ ...β(t.accentFaint), background:'none', border:'none', borderBottom:`1px solid ${t.accentFaint}`, paddingBottom:4, cursor:'crosshair' }}>BRAND_OS →</button>,
+              desc: 'Subdued. Dim accent underline',
+              states: [
+                { name: 'DEFAULT', el: <button style={{ ...β(t.accentFaint), background:'none', border:'none', borderBottom:`1px solid ${t.accentFaint}`, paddingBottom:4, cursor:'crosshair' }}>BRAND_OS →</button> },
+                { name: 'HOVER', el: <button style={{ ...β(t.accent), background:'none', border:'none', borderBottom:`1px solid ${t.accent}`, paddingBottom:4, cursor:'crosshair' }}>BRAND_OS →</button> },
+              ],
+            },
+            {
+              label: 'NAV_LINK',
+              desc: 'Section navigation. Active shows accent underline',
+              states: [
+                { name: 'DEFAULT', el: <span style={{ ...μ(t.text), borderBottom:'2px solid transparent', paddingBottom:4 }}>LAB</span> },
+                { name: 'HOVER', el: <span style={{ ...μ(t.accentFaint), borderBottom:`2px solid ${t.accentFaint}`, paddingBottom:4 }}>LAB</span> },
+                { name: 'ACTIVE', el: <span style={{ ...μ(t.text), borderBottom:`2px solid ${t.accent}`, paddingBottom:4 }}>LAB</span> },
+              ],
             },
             {
               label: 'THEME_TOGGLE',
-              desc: 'Nav element — border box, hover fill state',
-              element: <button style={{ ...μ(t.accentSecondary), padding:'6px 14px', border:`1px solid ${t.borderStrong}`, background:'transparent', cursor:'crosshair', letterSpacing:'0.3em' }}>{t.toggleLabel}</button>,
+              desc: 'Nav element. Bordered box, fill on hover',
+              states: [
+                { name: 'DEFAULT', el: <button style={{ ...μ(t.accentSecondary), padding:'6px 14px', border:`1px solid ${t.borderStrong}`, background:'transparent', cursor:'crosshair', letterSpacing:'0.3em' }}>{t.toggleLabel}</button> },
+                { name: 'HOVER', el: <button style={{ ...μ(t.accent), padding:'6px 14px', border:`1px solid ${t.borderStrong}`, background:t.bgHover, cursor:'crosshair', letterSpacing:'0.3em' }}>{t.toggleLabel}</button> },
+              ],
             },
             {
               label: 'EXTERNAL_LINK',
-              desc: 'Mono label + arrow — opens in new tab',
-              element: <a href="#" style={{ ...μ(t.accentLabel), textDecoration:'none', display:'flex', alignItems:'center', gap:8 }}>ENTER_KIZUNA <ExternalLink size={10}/></a>,
+              desc: 'Mono label + arrow. Opens in new tab',
+              states: [
+                { name: 'DEFAULT', el: <span style={{ ...μ(t.accentLabel), display:'flex', alignItems:'center', gap:8 }}>ENTER_KIZUNA <ExternalLink size={10}/></span> },
+                { name: 'HOVER', el: <span style={{ ...μ(t.accent), display:'flex', alignItems:'center', gap:8 }}>ENTER_KIZUNA <ExternalLink size={10}/></span> },
+              ],
             },
-            {
-              label: 'TOOL_CHIP',
-              desc: 'Bordered tag — link to external tool',
-              element: (
-                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-                  {['Claude', 'Figma', 'Vercel'].map(n => (
-                    <span key={n} style={{ ...μ(t.accentLabel), padding:'5px 12px', border:`1px solid ${t.border}` }}>{n}</span>
-                  ))}
-                </div>
-              ),
-            },
-            {
-              label: 'TYPE_TAG',
-              desc: 'Build stream classification badge',
-              element: (
-                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
-                  {['VIBE_CODE', 'DESIGN', 'AI_BUILD'].map(t2 => (
-                    <span key={t2} style={{ ...μ(t.accentSecondary), padding:'5px 14px', border:`1px solid ${t.borderStrong}` }}>{t2}</span>
-                  ))}
-                </div>
-              ),
-            },
-            {
-              label: 'ACTIVE_INDICATOR',
-              desc: 'Pulsing dot — signals live / in-progress state',
-              element: (
-                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                  <div style={{ width:6, height:6, borderRadius:'50%', background:t.pulseColor, boxShadow:`0 0 8px ${t.pulseShadow}`, animation:'pulse 2s infinite' }} />
-                  <span style={μ(t.accentLabel)}>ACTIVE_PROCESS</span>
-                </div>
-              ),
-            },
-            {
-              label: 'NAV_ITEM',
-              desc: 'Navigation — mono small, crosshair cursor',
-              element: (
-                <div style={{ display:'flex', gap:24, alignItems:'center' }}>
-                  <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:12, letterSpacing:'0.5em', textTransform:'uppercase', color:t.text }}>LAUWVERSE</span>
-                  <button style={{ fontFamily:'JetBrains Mono, monospace', fontSize:12, letterSpacing:'0.5em', textTransform:'uppercase', color:t.text, background:'none', border:'none', cursor:'crosshair' }}>BUILD</button>
-                </div>
-              ),
-            },
-          ].map((item, i) => (
-            <div key={i} style={{ padding:'40px', background:t.bg, display:'flex', flexDirection:'column', justifyContent:'space-between', gap:28, minHeight:160 }}>
-              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                <span style={μ(t.accentLabel, { fontSize:12 })}>{item.label}</span>
-                <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:12, color:t.textFaint, letterSpacing:'0.15em', textTransform:'none' }}>{item.desc}</span>
+          ].map((item, i, arr) => (
+            <div key={i} style={{ display:'grid', gridTemplateColumns:'200px 1fr', borderBottom: i < arr.length - 1 ? `1px solid ${t.border}` : 'none' }}>
+              <div style={{ padding:'28px 24px', borderRight:`1px solid ${t.border}`, display:'flex', flexDirection:'column', justifyContent:'center', gap:6 }}>
+                <span style={μ(t.accentLabel)}>{item.label}</span>
+                <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:10, color:t.textFaint, letterSpacing:'0.1em', textTransform:'none', lineHeight:1.6 }}>{item.desc}</span>
               </div>
-              <div>{item.element}</div>
+              <div style={{ padding:'28px 24px', display:'flex', gap:32, alignItems:'center' }}>
+                {item.states.map(s => (
+                  <div key={s.name} style={{ display:'flex', flexDirection:'column', gap:10, alignItems:'flex-start' }}>
+                    <span style={μ(t.textFaint, { fontSize:9 })}>{s.name}</span>
+                    {s.el}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── 05 INDICATORS & STATUS ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="05" title="COMPONENTS // STATUS" sub="Indicators · Badges" />
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
+          {/* Active indicator */}
+          <div style={{ padding:'40px', background:t.bg, display:'flex', flexDirection:'column', gap:28 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <span style={μ(t.accentLabel)}>ACTIVE_INDICATOR</span>
+              <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:10, color:t.textFaint, letterSpacing:'0.1em', textTransform:'none' }}>Pulsing dot. Live / in-progress state</span>
+            </div>
+            <div style={{ display:'flex', gap:32, alignItems:'center' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div style={{ width:6, height:6, borderRadius:'50%', background:t.pulseColor, boxShadow:`0 0 8px ${t.pulseShadow}`, animation:'pulse 2s infinite' }} />
+                <span style={μ(t.pulseColor)}>ACTIVE</span>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div style={{ width:6, height:6, borderRadius:'50%', background:t.accentFaint }} />
+                <span style={μ(t.textFaint)}>INACTIVE</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Status badge */}
+          <div style={{ padding:'40px', background:t.bg, display:'flex', flexDirection:'column', gap:28 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <span style={μ(t.accentLabel)}>STATUS_BADGE</span>
+              <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:10, color:t.textFaint, letterSpacing:'0.1em', textTransform:'none' }}>Project lifecycle: live, archive, version</span>
+            </div>
+            <div style={{ display:'flex', gap:16, alignItems:'center' }}>
+              <StatusBadge status="LIVE" t={t} active />
+              <StatusBadge status="ARCHIVE" t={t} />
+              <StatusBadge status="v1.7" t={t} />
+            </div>
+          </div>
+
+          {/* Section label */}
+          <div style={{ padding:'40px', background:t.bg, display:'flex', flexDirection:'column', gap:28 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <span style={μ(t.accentLabel)}>SECTION_LABEL</span>
+              <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:10, color:t.textFaint, letterSpacing:'0.1em', textTransform:'none' }}>Filled + stroke headline pair</span>
+            </div>
+            <div style={{ transform:'scale(0.65)', transformOrigin:'left center' }}>
+              <SectionLabel filled="Signal" outline="Feed" t={t} />
+            </div>
+          </div>
+
+          {/* Filter button */}
+          <div style={{ padding:'40px', background:t.bg, display:'flex', flexDirection:'column', gap:28 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <span style={μ(t.accentLabel)}>FILTER_BUTTON</span>
+              <span style={{ fontFamily:'JetBrains Mono, monospace', fontSize:10, color:t.textFaint, letterSpacing:'0.1em', textTransform:'none' }}>Toggle filter. Active / inactive states</span>
+            </div>
+            <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+              <span style={{ ...TYPE.mono.sm, fontSize:'0.625rem', letterSpacing:'0.25em', color:t.text, background:alpha(t.accent, 0.12), border:`1px solid ${t.accent}`, padding:'6px 14px' }}>ACTIVE</span>
+              <span style={{ ...TYPE.mono.sm, fontSize:'0.625rem', letterSpacing:'0.25em', color:t.textFaint, border:`1px solid ${t.border}`, padding:'6px 14px' }}>INACTIVE</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 06 SPACING & GRID ── */}
+      <section style={{ marginBottom:64 }}>
+        <SectionHeader num="06" title="FOUNDATION // LAYOUT" sub="Grid · Spacing · Borders" />
+
+        <div style={{ display:'flex', flexDirection:'column', gap:48 }}>
+          {/* Grid system */}
+          <div>
+            <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>GRID</span>
+            <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
+              {[
+                { prop: 'MAX_WIDTH', value: '960px', desc: 'Content container' },
+                { prop: 'GUTTER', value: '24px', desc: 'Horizontal padding' },
+                { prop: 'GAP_CELL', value: '1px', desc: 'Grid cell separator' },
+              ].map((row, i, arr) => (
+                <div key={row.prop} style={{ display:'grid', gridTemplateColumns:'160px 100px 1fr', borderBottom: i < arr.length - 1 ? `1px solid ${t.border}` : 'none' }}>
+                  <span style={{ padding:'14px 20px', ...μ(t.text) }}>{row.prop}</span>
+                  <span style={{ padding:'14px 20px', ...μ(t.accent), borderLeft:`1px solid ${t.border}` }}>{row.value}</span>
+                  <span style={{ padding:'14px 20px', fontFamily:'JetBrains Mono, monospace', fontSize:11, color:t.textFaint, letterSpacing:'0.08em', textTransform:'none', borderLeft:`1px solid ${t.border}` }}>{row.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Spacing scale */}
+          <div>
+            <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>SPACING SCALE</span>
+            <div style={{ display:'flex', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
+              {[
+                { label: 'XS', value: '8px' },
+                { label: 'SM', value: '16px' },
+                { label: 'MD', value: '24px' },
+                { label: 'LG', value: '48px' },
+                { label: 'XL', value: '64px' },
+                { label: '2XL', value: '96px' },
+                { label: '3XL', value: '128px' },
+                { label: '4XL', value: '192px' },
+              ].map(step => (
+                <div key={step.label} style={{ flex:1, background:t.bg, padding:'20px 8px', display:'flex', flexDirection:'column', alignItems:'center', gap:12 }}>
+                  <div style={{ width:parseInt(step.value), height:parseInt(step.value), maxWidth:'100%', maxHeight:48, background:alpha(t.accent, 0.15), border:`1px solid ${alpha(t.accent, 0.3)}` }} />
+                  <span style={μ(t.text, { fontSize:10 })}>{step.label}</span>
+                  <span style={μ(t.textFaint, { fontSize:9 })}>{step.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Border tokens */}
+          <div>
+            <span style={{ ...μ(t.textFaint), display:'block', marginBottom:20 }}>BORDERS</span>
+            <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
+              {[
+                { name: 'border', style: `1px solid ${t.border}`, desc: 'Default separator' },
+                { name: 'borderStrong', style: `1px solid ${t.borderStrong}`, desc: 'Emphasis / interactive' },
+                { name: 'accent', style: `2px solid ${t.accent}`, desc: 'Active state / CTA' },
+              ].map((row, i, arr) => (
+                <div key={row.name} style={{ display:'grid', gridTemplateColumns:'160px 1fr 1fr', borderBottom: i < arr.length - 1 ? `1px solid ${t.border}` : 'none' }}>
+                  <span style={{ padding:'16px 20px', ...μ(t.text) }}>{row.name}</span>
+                  <div style={{ padding:'16px 20px', borderLeft:`1px solid ${t.border}`, display:'flex', alignItems:'center' }}>
+                    <div style={{ width:'100%', borderBottom:row.style }} />
+                  </div>
+                  <span style={{ padding:'16px 20px', fontFamily:'JetBrains Mono, monospace', fontSize:11, color:t.textFaint, letterSpacing:'0.08em', textTransform:'none', borderLeft:`1px solid ${t.border}` }}>{row.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1065,62 +1389,50 @@ const LAB_FEATURED = [
     desc: 'Community intelligence platform. Discord-native signal processing and activation.',
     url: 'https://www.kizuna.gg',
     tags: ['SOCIAL AI', 'DESIGN'],
-    status: 'LIVE',
     active: true,
     canvas: 'network',
   },
   {
     title: 'WOLVES',
-    desc: 'Digital collective. Web3 culture, creative direction, and community-first thinking.',
+    desc: 'A pack for builders. Founders, creators, investors, and operators, sharpening each other.',
     url: 'https://www.wolves.co',
     tags: ['WEB3', 'CULTURE'],
-    status: 'ARCHIVE',
-    active: false,
+    active: true,
     canvas: 'swarm',
   },
 ];
 
 const LAB_INDEX = [
-  { title: 'LAUWVERSE_OS', desc: 'This site — interactive portfolio & design system.', url: '#', tags: ['VIBE_CODE'], status: 'LIVE' },
-  { title: 'BRAND_OS', desc: 'Token library & interactive primitives.', url: '#design', tags: ['DESIGN'], status: 'v1.7' },
+  { title: 'LAUWVERSE.XYZ', desc: 'The lab. Where ideas, interfaces, and systems get built in the open.', url: '#', tags: ['VIBE_CODE'] },
+  { title: 'BRAND_OS', desc: 'The system behind everything Lauw builds. Tokens, typography, color, logo.', url: '#design', tags: ['DESIGN'] },
 ];
 
 // ─── LAB CARD (featured, with hover-activated canvas) ────────────────────────
-const LabCard = ({ project, theme, t }) => {
+const LabCard = ({ project, theme, t, onTagClick }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <article>
-      <a href={project.url} target="_blank" rel="noopener noreferrer"
-        style={{ background: hovered ? t.bgHover : t.bg, display:'flex', flexDirection:'column', textDecoration:'none', color:'inherit', overflow:'hidden', position:'relative', transition:'background 0.3s ease' }}
+      <a className="lab-card__link" href={project.url} target="_blank" rel="noopener noreferrer"
+        style={{ background: hovered ? t.bgHover : t.bg }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Canvas visual */}
-        <div style={{ position:'relative', width:'100%', aspectRatio:'4/3', overflow:'hidden' }}>
+        <div className="lab-card__visual">
           <LabCanvas type={project.canvas} theme={theme} animating={hovered} />
-          {/* Active indicator */}
-          {project.active && (
-            <div style={{ position:'absolute', top:16, left:20, zIndex:2 }}>
-              <StatusBadge status="ACTIVE" t={t} active />
-            </div>
-          )}
-          <h3 style={{
-            position:'absolute', bottom:16, left:20, zIndex:2,
+          <h3 className="lab-card__title" style={{
             ...TYPE.display.xl, color:t.text,
             textShadow: theme === 'midnight' ? '0 2px 20px rgba(3,2,14,0.8)' : '0 2px 20px rgba(240,240,249,0.6)',
           }}>{project.title}</h3>
         </div>
 
-        {/* Info */}
-        <div style={{ padding:'20px', display:'flex', flexDirection:'column', gap:12, flex:1 }}>
+        <div className="lab-card__body">
           <p style={{ ...TYPE.body.sm, color:t.textMuted }}>{project.desc}</p>
         </div>
 
-        {/* Footer */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', borderTop:`1px solid ${t.border}` }}>
-          <div style={{ display:'flex', gap:6 }}>
+        <div className="lab-card__footer">
+          <div className="lab-card__tags">
             {project.tags.map(tag => (
-              <Tag key={tag} t={t}>{tag}</Tag>
+              <Tag key={tag} t={t} onClick={(e) => { e.preventDefault(); e.stopPropagation(); onTagClick(tag); }}>{tag}</Tag>
             ))}
           </div>
           <span style={{ ...TYPE.mono.sm, fontSize:'0.6875rem', letterSpacing:'0.25em', color: hovered ? t.accent : t.accentFaint, transition:'color 0.3s' }}>ENTER &#8599;</span>
@@ -1137,17 +1449,53 @@ export default function App() {
   const [page, setPage]             = useState('home');
   const treeDensityTarget = useRef(200 + Math.floor(Math.random() * 200)).current;
   const [treeDensity, setTreeDensity] = useState(20);
+  const fogLevel = 75;
+  const fogTopOpacity = 0;
+  const fogBottomOpacity = 100;
   const [mousePos, setMousePos]     = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered]   = useState(false);
   const [scrollY, setScrollY]       = useState(0);
   const [signalFilter, setSignalFilter] = useState('ALL');
+  const [glossaryTag, setGlossaryTag]   = useState(null);
   const textRef = useRef(null);
   const t = THEMES[theme];
 
+  const openGlossary = (tag) => setGlossaryTag(tag);
+  const closeGlossary = () => setGlossaryTag(null);
+
   const [isScrolling, setIsScrolling] = useState(false);
+  const [activeSection, setActiveSection] = useState(null);
   const scrollTimerRef = useRef(null);
 
-  // Animate tree density from sparse → target over ~60 seconds (feels alive)
+  useEffect(() => {
+    const onScroll = () => {
+      setScrollY(window.scrollY);
+      setIsScrolling(true);
+      clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 150);
+    };
+    window.addEventListener('scroll', onScroll);
+    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(scrollTimerRef.current); };
+  }, []);
+
+  // Track which section is currently in view
+  useEffect(() => {
+    const ids = ['lab', 'signal', 'protocol'];
+    const observers = [];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const observer = new IntersectionObserver(
+        ([entry]) => { if (entry.isIntersecting) setActiveSection(id); },
+        { rootMargin: '-40% 0px -55% 0px' }
+      );
+      observer.observe(el);
+      observers.push(observer);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, [page]);
+
+  // Animate tree density from sparse → target over ~30 seconds (feels alive)
   useEffect(() => {
     let raf;
     const start = performance.now();
@@ -1163,17 +1511,6 @@ export default function App() {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [treeDensityTarget]);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setScrollY(window.scrollY);
-      setIsScrolling(true);
-      clearTimeout(scrollTimerRef.current);
-      scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 150);
-    };
-    window.addEventListener('scroll', onScroll);
-    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(scrollTimerRef.current); };
-  }, []);
 
   const handleMouseMove = (e) => {
     if (!textRef.current) return;
@@ -1202,13 +1539,6 @@ export default function App() {
     { date: '28.MAR',  title: 'Agentic_Interface_Sprint',         type: 'BUILD',   source: 'Kizuna' },
     { date: '25.MAR',  title: 'Community_Signal_Processing',      type: 'THINKING',source: 'Research' },
     { date: '22.MAR',  title: 'Neural_Design_Tokens_v2',          type: 'BUILD',   source: 'Brand OS' },
-    { date: '19.MAR',  title: 'On-Chain_Identity_Patterns',       type: 'READING', source: 'Mirror.xyz' },
-    { date: '15.MAR',  title: 'Claude_MCP_Implementation',        type: 'BUILD',   source: 'Kizuna' },
-    { date: '12.MAR',  title: 'Generative_UI_as_Brand_Language',  type: 'THINKING',source: 'Notes' },
-    { date: '08.MAR',  title: 'Vibe-Coding_Manifesto',            type: 'READING', source: 'X Thread' },
-    { date: '04.MAR',  title: 'Discord_Bot_Activation_Flow',      type: 'BUILD',   source: 'Kizuna' },
-    { date: '01.MAR',  title: 'WCAG_Contrast_in_Dark_Interfaces', type: 'READING', source: 'W3C' },
-    { date: '26.FEB',  title: 'AI_Copilot_Product_Patterns',      type: 'THINKING',source: 'Research' },
   ];
 
   const signalTypes = ['ALL', 'BUILD', 'READING', 'THINKING'];
@@ -1244,140 +1574,26 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: t.bg, color: t.text, overflowX: 'hidden', cursor: 'crosshair', fontFamily: 'Inter, sans-serif', transition: 'background-color 0.5s ease, color 0.5s ease' }}>
-
-      <style>{`
-        html, body { overflow-x: hidden; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        ::selection { background: ${t.selection}; color: white; }
-        ::-webkit-scrollbar { width: 2px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: ${t.scrollThumb}; }
-        ::-webkit-scrollbar-thumb:hover { background: ${t.scrollHover}; }
-        body::before {
-          content: ""; position: fixed; top:0;left:0;width:100%;height:100%;
-          background: repeating-linear-gradient(0deg,transparent,transparent 3px,${t.scanline} 3px,${t.scanline} 6px);
-          pointer-events: none; z-index: 1000; transition: background 0.5s ease;
-        }
-        input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:${t.border};border-radius:0;cursor:pointer;outline:none;}
-        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;background:${t.accent};border-radius:0;margin-top:-4px;}
-        @keyframes delayed-shard-jitter {
-          0%,75%{ clip-path:none; transform:translate(0); }
-          77%   { clip-path:inset(10% 0 85% 0); transform:translateX(-2px); }
-          82%   { clip-path:inset(45% 0 5% 0);  transform:translateX(3px);  }
-          87%   { clip-path:none; transform:translate(0); }
-          90%   { clip-path:inset(15% 0 65% 0); transform:translateX(-4px); }
-          95%   { clip-path:inset(80% 0 10% 0); transform:translateX(2px);  }
-          100%  { clip-path:none; transform:translate(0); }
-        }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes fadeInLine { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-        .animate-in { animation: fadeIn 1s ease both; }
-
-        /* ── SIGNAL LOG ──────────────────────────────────────────── */
-        .signal-list {
-          display: flex; flex-direction: column;
-          gap: 1px; list-style: none;
-        }
-        .signal-entry {
-          display: flex; align-items: center;
-          justify-content: space-between;
-          padding: 28px 24px; cursor: crosshair;
-          flex-wrap: wrap; gap: 12px;
-          border-left: 2px solid transparent;
-          transition: background 0.25s, border-left-color 0.25s, opacity 0.4s, transform 0.4s;
-        }
-        .signal-entry__info {
-          display: flex; align-items: center;
-          gap: 24px; flex: 1; min-width: 0;
-        }
-        .signal-entry__title {
-          font-family: 'Big Shoulders Display', Impact, sans-serif;
-          font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-          font-weight: 800; text-transform: uppercase;
-          letter-spacing: -0.02em; line-height: 1.1;
-          min-width: 0; overflow: hidden;
-          text-overflow: ellipsis; white-space: nowrap;
-        }
-        .signal-entry__meta {
-          display: flex; align-items: center;
-          gap: 16px; flex-shrink: 0;
-        }
-
-        /* Filter button glitch effect on click */
-        @keyframes filterGlitch {
-          0%   { transform: translate(0); filter: none; }
-          10%  { transform: translateX(-3px) skewX(-2deg); filter: hue-rotate(40deg); }
-          20%  { transform: translateX(2px) skewX(1deg); filter: hue-rotate(-20deg) brightness(1.3); }
-          30%  { transform: translate(-1px, 1px); filter: none; }
-          40%  { transform: translateX(3px); filter: saturate(2) brightness(1.1); }
-          50%  { transform: translate(0); filter: hue-rotate(10deg); }
-          60%  { transform: translateX(-2px) skewX(1deg); filter: none; }
-          70%  { transform: translate(1px, -1px); filter: brightness(1.2); }
-          80%  { transform: translate(0); filter: none; }
-          100% { transform: translate(0); filter: none; }
-        }
-        .filter-glitch {
-          animation: filterGlitch 0.35s steps(1) both;
-        }
-
-        /* Signal items animate in on filter change */
-        @keyframes signalSlideIn {
-          from { opacity: 0; transform: translateX(-12px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        .signal-animate-in {
-          animation: signalSlideIn 0.3s ease both;
-        }
-
-        /* ── LINEAGE ─────────────────────────────────────────────── */
-        .lineage-list { display: flex; flex-direction: column; list-style: none; }
-        .lineage-item {
-          display: flex; align-items: center;
-          justify-content: space-between;
-          padding: 44px 16px; cursor: crosshair;
-          flex-wrap: wrap; gap: 16px;
-          border-left: 2px solid transparent;
-          transition: background 0.2s, border-left-color 0.2s;
-        }
-        .lineage-item__info { display: flex; align-items: center; gap: 32px; }
-        .lineage-item__entity {
-          font-family: 'Big Shoulders Display', Impact, sans-serif;
-          font-size: clamp(1.25rem, 3vw, 1.875rem);
-          font-weight: 800; text-transform: uppercase;
-          letter-spacing: -0.03em; line-height: 1.05;
-        }
-        .lineage-item__role {
-          font-family: 'Inter', sans-serif;
-          font-size: 0.875rem; font-weight: 300;
-          letter-spacing: 0.05em; margin-top: 6px;
-          text-transform: uppercase;
-        }
-      `}</style>
+    <div className="site" style={themeToVars(t)}>
 
       {/* ── NAV ──────────────────────────────────────────────────────────── */}
       <header>
-      <nav style={{ position:'fixed', top:0, left:0, width:'100%', zIndex:50, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'24px 48px', backdropFilter:'blur(16px)', backgroundColor:t.navBg, borderBottom:`1px solid ${t.border}`, transition:'background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:12, cursor:'pointer' }} onClick={() => window.scrollTo({ top:0, behavior:'smooth' })}>
-          <div style={{ width:6, height:6, background:t.pulseColor, borderRadius:'50%', animation:'pulse 2s infinite', boxShadow:`0 0 8px ${t.pulseShadow}` }} />
+      <nav className="nav">
+        <div className="nav__brand" onClick={() => window.scrollTo({ top:0, behavior:'smooth' })}>
+          <div className="nav__pulse" />
           <span style={{ ...μ(t.text), transition:'color 0.5s ease' }}>LAUWVERSE</span>
         </div>
-        <div style={{ display:'flex', gap:28, alignItems:'center' }}>
+        <div className="nav__links">
           {[{ label:'LAB', id:'lab' }, { label:'SIGNAL', id:'signal' }, { label:'ORIGIN', id:'protocol' }].map(({ label, id }) => (
-            <button key={id} onClick={() => document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' })}
-              style={{ ...μ(t.text), background:'none', border:'none', cursor:'crosshair', transition:'color 0.2s ease' }}
-              onMouseEnter={e => e.currentTarget.style.color = t.accent}
-              onMouseLeave={e => e.currentTarget.style.color = t.text}
+            <button key={id}
+              className={`nav__link${activeSection === id ? ' nav__link--active' : ''}`}
+              onClick={() => document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' })}
+              style={{ ...TYPE.mono.sm, letterSpacing: '0.4em' }}
             >{label}</button>
           ))}
-<button onClick={() => setTheme(theme === 'midnight' ? 'primal' : 'midnight')} style={{
-            ...μ(t.accentSecondary), padding:'6px 14px',
-            border:`1px solid ${t.borderStrong}`, background:'transparent', cursor:'crosshair',
-            letterSpacing:'0.3em', transition:'background-color 0.3s ease, color 0.5s ease, border-color 0.5s ease',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.background = t.bgHover; e.currentTarget.style.color = t.accent; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = t.accentSecondary; }}
+          <button className="nav__theme-toggle"
+            onClick={() => setTheme(theme === 'midnight' ? 'primal' : 'midnight')}
+            style={μ(t.accentSecondary)}
           >{t.toggleLabel}</button>
         </div>
       </nav>
@@ -1389,68 +1605,61 @@ export default function App() {
       ) : (<>
 
         {/* HERO — full width */}
-        <section className="animate-in" style={{ minHeight:'60vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', paddingTop:120, position:'relative', overflow:'hidden' }}>
-          <HeroScene scrollY={scrollY} theme={theme} density={treeDensity} />
+        <section className="hero animate-in">
+          <HeroScene scrollY={scrollY} theme={theme} density={treeDensity} fogLevel={fogLevel} fogTopOpacity={fogTopOpacity} fogBottomOpacity={fogBottomOpacity} />
 
           {/* HERO TITLE — parallax cross */}
-          <div style={{ display:'flex', flexDirection:'column', marginBottom:48, position:'relative', zIndex:1 }}>
-            {/* PRIMAL drifts DOWN on scroll */}
+          <div className="hero__titles">
             <h1 style={{ ...TYPE.display.hero, lineHeight:0.7, color:t.text, transform:`translateY(${scrollY*0.12}px)`, willChange:'transform', transition:'color 0.5s ease' }}>PRIMAL</h1>
-            {/* FUTURE. drifts UP — they move toward each other and cross */}
             <div ref={textRef} onMouseMove={handleMouseMove} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => { setIsHovered(false); setMousePos({x:0,y:0}); }} style={{ display:'inline-block', overflow:'visible', transform:`translateY(${-scrollY*0.18}px)`, willChange:'transform' }}>
               <h1 style={futureTitleStyle}>FUTURE.</h1>
             </div>
           </div>
 
           {/* TAGLINE */}
-          <div style={{ maxWidth:560, display:'flex', flexDirection:'column', gap:40, position:'relative', zIndex:1 }}>
-            <p style={{ ...μ(t.textSecondary, { fontSize:12, letterSpacing:'0.35em', animation:'fadeInLine 0.6s ease 0.1s both' }) }}>
+          <div className="hero__tagline">
+            <p className="hero__tagline-text" style={μ(t.textSecondary, { fontSize:12, letterSpacing:'0.35em' })}>
               BUILDING AT THE INTERSECTION OF AI + DESIGN
             </p>
-            <div style={{ display:'flex', gap:40, justifyContent:'center', alignItems:'center' }}>
-              <button style={{ ...TYPE.label.md, color:t.text, background:'none', border:'none', borderBottom:`2px solid ${t.accent}`, paddingBottom:4, cursor:'crosshair', transition:'color 0.5s ease, border-color 0.5s ease' }}>DISCOVER</button>
-              <button onClick={() => setPage('design')} style={{ ...TYPE.label.md, color:t.accentFaint, background:'none', border:'none', borderBottom:`1px solid ${t.accentFaint}`, paddingBottom:4, cursor:'crosshair', transition:'color 0.2s ease' }}
-                onMouseEnter={e => e.currentTarget.style.color=t.accent}
-                onMouseLeave={e => e.currentTarget.style.color=t.accentFaint}
+            <div className="hero__actions">
+              <button className="hero__cta hero__cta--primary" style={TYPE.label.md}>DISCOVER</button>
+              <button className="hero__cta hero__cta--secondary"
+                onClick={() => setPage('design')}
+                style={TYPE.label.md}
               >BRAND_OS →</button>
             </div>
           </div>
         </section>
 
-      <main style={{ position:'relative', maxWidth:960, margin:'0 auto', padding:'0 24px 128px', borderLeft:`1px solid ${t.border}`, borderRight:`1px solid ${t.border}` }}>
+      <main className="main">
 
         {/* LAB ARTIFACTS */}
-        <section id="lab" style={{ marginTop:96, scrollMarginTop:80 }}>
-          <SectionLabel filled="Lab" outline="Output" t={t} />
+        <section id="lab" className="section section--lab">
+          <SectionLabel filled="Lab" outline="Output" tagline="What I make. Products, systems, and the things in between." t={t} />
 
           {/* Featured — 2-column canvas cards */}
-          <div role="list" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}`, marginBottom:1 }}>
+          <div role="list" className="lab__grid">
             {LAB_FEATURED.map(project => (
-              <LabCard key={project.title} project={project} theme={theme} t={t} />
+              <LabCard key={project.title} project={project} theme={theme} t={t} onTagClick={openGlossary} />
             ))}
           </div>
 
           {/* Index — full-width horizontal bars */}
-          <div style={{ display:'flex', flexDirection:'column', gap:1, background:t.border, border:`1px solid ${t.border}`, borderTop:'none' }}>
+          <div className="lab__index">
             {LAB_INDEX.map(project => (
-              <a key={project.title} href={project.url === '#design' ? undefined : project.url} target={project.url.startsWith('http') ? '_blank' : undefined} rel={project.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+              <a key={project.title} className="lab__index-item"
+                href={project.url === '#design' ? undefined : project.url}
+                target={project.url.startsWith('http') ? '_blank' : undefined}
+                rel={project.url.startsWith('http') ? 'noopener noreferrer' : undefined}
                 onClick={project.url === '#design' ? (e) => { e.preventDefault(); setPage('design'); window.scrollTo({ top:0 }); } : undefined}
-                style={{
-                  background:t.bg, display:'flex', alignItems:'center', justifyContent:'space-between',
-                  padding:'0 20px', height:120, textDecoration:'none', color:'inherit', cursor:'crosshair',
-                  borderLeft:'2px solid transparent', transition:'background 0.2s, border-left-color 0.2s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = t.bgHover; e.currentTarget.style.borderLeftColor = t.accent; }}
-                onMouseLeave={e => { e.currentTarget.style.background = t.bg; e.currentTarget.style.borderLeftColor = 'transparent'; }}
               >
-                <div style={{ display:'flex', alignItems:'center', gap:32, flex:1, minWidth:0 }}>
-                  <StatusBadge status={project.status} t={t} active={project.status === 'LIVE'} />
+                <div className="lab__index-info">
                   <h3 style={{ ...TYPE.display.lg, color:t.text, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{project.title}</h3>
                   <p style={{ ...TYPE.body.sm, color:t.textMuted, flex:1, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{project.desc}</p>
                 </div>
-                <div style={{ display:'flex', alignItems:'center', gap:16, flexShrink:0 }}>
+                <div className="lab__index-meta">
                   {project.tags.map(tag => (
-                    <Tag key={tag} t={t}>{tag}</Tag>
+                    <Tag key={tag} t={t} onClick={(e) => { e.preventDefault(); e.stopPropagation(); openGlossary(tag); }}>{tag}</Tag>
                   ))}
                   <ArrowRight size={14} style={{ color:t.accent }} />
                 </div>
@@ -1460,19 +1669,18 @@ export default function App() {
         </section>
 
         {/* ── SIGNAL — Living Log ── */}
-        <section id="signal" style={{ marginTop:192, scrollMarginTop:80 }}>
-          <SectionLabel filled="Signal" outline="Feed" t={t} />
+        <section id="signal" className="section section--signal">
+          <SectionLabel filled="Signal" outline="Feed" tagline="Low noise log. Signals I pick up and can't stop thinking about." t={t} />
 
           {/* Filter buttons */}
-          <div style={{ display:'flex', gap:8, marginBottom:24 }}>
+          <div className="signal__filters">
             {signalTypes.map(type => (
-              <button key={type}
+              <button key={type} className="signal__filter-btn"
                 onClick={(e) => {
                   setSignalFilter(type);
-                  // Trigger glitch effect on the button row
                   const parent = e.currentTarget.parentElement;
                   parent.classList.remove('filter-glitch');
-                  void parent.offsetWidth; // force reflow
+                  void parent.offsetWidth;
                   parent.classList.add('filter-glitch');
                 }}
                 style={{
@@ -1480,63 +1688,56 @@ export default function App() {
                   color: signalFilter === type ? t.text : t.textFaint,
                   background: signalFilter === type ? alpha(t.accent, 0.12) : 'transparent',
                   border: `1px solid ${signalFilter === type ? t.accent : t.border}`,
-                  padding:'6px 14px', cursor:'crosshair',
-                  transition:'color 0.2s, background 0.2s, border-color 0.2s',
                 }}
                 onMouseEnter={e => { if (signalFilter !== type) { e.currentTarget.style.borderColor = t.borderStrong; e.currentTarget.style.color = t.textMuted; }}}
                 onMouseLeave={e => { if (signalFilter !== type) { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.textFaint; }}}
               >{type}</button>
             ))}
-            <span style={{ ...TYPE.mono.sm, fontSize:'0.5625rem', letterSpacing:'0.2em', color:t.textFaint, marginLeft:'auto', alignSelf:'center' }}>
+            <span className="signal__count" style={{ ...TYPE.mono.sm, fontSize:'0.5625rem', letterSpacing:'0.2em', color:t.textFaint }}>
               {filteredSignal.length} ENTRIES
             </span>
           </div>
 
           {/* Log entries */}
-          <ol className="signal-list" style={{ background:t.border, border:`1px solid ${t.border}` }}>
+          <ol className="signal__list">
             {filteredSignal.map((entry, i) => (
               <li key={`${entry.date}-${entry.title}`}
-                className="signal-entry signal-animate-in"
-                style={{ background:t.bg, animationDelay:`${i * 0.04}s` }}
-                onMouseEnter={e => { e.currentTarget.style.background = t.bgHover; e.currentTarget.style.borderLeftColor = t.accent; }}
-                onMouseLeave={e => { e.currentTarget.style.background = t.bg; e.currentTarget.style.borderLeftColor = 'transparent'; }}
+                className="signal__entry signal__entry--animate"
+                style={{ animationDelay:`${i * 0.04}s` }}
               >
-                <div className="signal-entry__info">
+                <div className="signal__entry-info">
                   <time style={τ(t.textMuted, { minWidth:56, flexShrink:0, fontSize:'0.6875rem' })}>{entry.date}</time>
-                  <h3 className="signal-entry__title" style={{ color:t.text }}>{entry.title}</h3>
+                  <h3 className="signal__entry-title">{entry.title}</h3>
                 </div>
-                <div className="signal-entry__meta">
+                <div className="signal__entry-meta">
                   <span style={{ ...TYPE.mono.sm, fontSize:'0.5625rem', letterSpacing:'0.15em', color:t.textFaint, textTransform:'none' }}>{entry.source}</span>
-                  <span style={{ ...TYPE.label.md, fontSize:'0.625rem', color:t.accentSecondary, padding:'4px 12px', border:`1px solid ${t.borderStrong}` }}>{entry.type}</span>
+                  <Tag t={t} size="md" onClick={() => openGlossary(entry.type)}>{entry.type}</Tag>
                 </div>
               </li>
             ))}
           </ol>
         </section>
 
-        {/* ── PROTOCOL — Stack + Lineage + Connect ── */}
-        <section id="protocol" style={{ marginTop:192, scrollMarginTop:80 }}>
-          <SectionLabel filled="Origin" outline="Arc" t={t} />
+        {/* ── ORIGIN — Lineage + Process + Connect ── */}
+        <section id="protocol" className="section section--origin">
+          <SectionLabel filled="Origin" outline="Arc" tagline="How I got here. How I work. How to reach me." t={t} />
 
           {/* LINEAGE */}
-          <div style={{ marginBottom:64 }}>
-            <h3 style={μ(t.textFaint, { display:'block', marginBottom:20 })}>LINEAGE</h3>
-            <ul className="lineage-list">
+          <div className="origin__subsection">
+            <h3 className="origin__subsection-title" style={μ(t.textFaint)}>LINEAGE</h3>
+            <ul className="lineage__list">
               {lineage.map((item, i) => (
-                <li key={i} className="lineage-item" style={{ borderBottom:`1px solid ${t.border}` }}
-                  onMouseEnter={e => { e.currentTarget.style.background = t.bgHover; e.currentTarget.style.borderLeftColor = t.accent; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderLeftColor = 'transparent'; }}
-                >
-                  <div className="lineage-item__info">
+                <li key={i} className="lineage__item">
+                  <div className="lineage__item-info">
                     <time style={τ(t.textMuted, { minWidth:88, flexShrink:0 })}>{item.year}</time>
                     <div>
-                      <h3 className="lineage-item__entity" style={{ color:t.text }}>{item.entity}</h3>
-                      <p style={{ ...TYPE.body.intro, color:t.textMuted, marginTop:4, fontSize:'0.8125rem', fontWeight:300, letterSpacing:'0.08em' }}>{item.role}</p>
+                      <h3 className="lineage__item-entity" style={{ color:t.text }}>{item.entity}</h3>
+                      <p className="lineage__item-role" style={{ color:t.textMuted }}>{item.role}</p>
                     </div>
                   </div>
-                  <div style={{ display:'flex', gap:6, flexWrap:'wrap', justifyContent:'flex-end' }}>
+                  <div className="lineage__item-tags">
                     {item.tags.map(tag => (
-                      <Tag key={tag} t={t}>{tag}</Tag>
+                      <Tag key={tag} t={t} onClick={() => openGlossary(tag)}>{tag}</Tag>
                     ))}
                   </div>
                 </li>
@@ -1544,10 +1745,10 @@ export default function App() {
             </ul>
           </div>
 
-          {/* STACK */}
-          <div style={{ marginBottom:64 }}>
-            <h3 style={μ(t.textFaint, { display:'block', marginBottom:20 })}>PROCESS</h3>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', border:`1px solid ${t.border}` }}>
+          {/* PROCESS */}
+          <div className="origin__subsection">
+            <h3 className="origin__subsection-title" style={μ(t.textFaint)}>PROCESS</h3>
+            <div className="process__grid">
               {[
                 {
                   phase: 'THINK', num: '01',
@@ -1577,24 +1778,20 @@ export default function App() {
                     { name: 'Lovable', url: 'https://lovable.dev' },
                   ],
                 },
-              ].map((col, i) => (
-                <div key={col.phase} style={{ borderRight: i < 2 ? `1px solid ${t.border}` : 'none', display:'flex', flexDirection:'column' }}>
-                  <div style={{ padding:'32px 32px 24px', borderBottom:`1px solid ${t.border}` }}>
-                    <div style={{ display:'flex', alignItems:'baseline', gap:12, marginBottom:4 }}>
+              ].map((col) => (
+                <div key={col.phase} className="process__phase">
+                  <div className="process__phase-header">
+                    <div className="process__phase-num">
                       <span style={{ ...TYPE.numeral.xl, color:t.textFaint }}>{col.num}</span>
                     </div>
                     <span style={{ ...TYPE.display.xl, color:t.text, display:'block' }}>{col.phase}</span>
                   </div>
-                  <div style={{ padding:'28px 32px 32px', flex:1, borderBottom:`1px solid ${t.border}` }}>
+                  <div className="process__phase-body">
                     <p style={{ ...TYPE.body.md, fontWeight:300, color:t.textSecondary }}>{col.desc}</p>
                   </div>
-                  <div style={{ padding:'24px 32px', display:'flex', flexWrap:'wrap', gap:8 }}>
+                  <div className="process__tools">
                     {col.tools.map(tool => (
-                      <a key={tool.name} href={tool.url} target="_blank" rel="noopener noreferrer"
-                        style={{ ...μ(t.accentLabel), textDecoration:'none', padding:'5px 12px', border:`1px solid ${t.border}`, transition:'border-color 0.2s, color 0.2s', display:'inline-block' }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = t.accent; e.currentTarget.style.color = t.accentSecondary; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.accentLabel; }}
-                      >{tool.name}</a>
+                      <Tag key={tool.name} t={t} size="md" onClick={() => openGlossary(tool.name)}>{tool.name}</Tag>
                     ))}
                   </div>
                 </div>
@@ -1604,23 +1801,17 @@ export default function App() {
 
           {/* CONNECT */}
           <div>
-            <h3 style={μ(t.textFaint, { display:'block', marginBottom:20 })}>CONNECT</h3>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
-              <a href="https://x.com/lauwverse" target="_blank" rel="noopener noreferrer" style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:48, background:t.bg, textDecoration:'none', transition:'background 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = t.bgHover}
-                onMouseLeave={e => e.currentTarget.style.background = t.bg}
-              >
-                <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+            <h3 className="origin__subsection-title" style={μ(t.textFaint)}>CONNECT</h3>
+            <div className="connect__grid">
+              <a className="connect__item" href="https://x.com/lauwverse" target="_blank" rel="noopener noreferrer">
+                <div className="connect__item-info">
                   <Twitter size={14} style={{ color:t.textMuted }} />
                   <span style={β(t.textSecondary)}>X_NETWORK</span>
                 </div>
                 <ArrowUpRight size={14} style={{ color:t.accent }} />
               </a>
-              <button onClick={copyEmail} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:48, background:t.bg, border:'none', cursor:'crosshair', transition:'background 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = t.bgHover}
-                onMouseLeave={e => e.currentTarget.style.background = t.bg}
-              >
-                <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              <button className="connect__item" onClick={copyEmail}>
+                <div className="connect__item-info">
                   <Mail size={14} style={{ color:t.textMuted }} />
                   <span style={β(t.textSecondary)}>{emailCopied ? 'EMAIL_SYNCED' : 'VAULT_EMAIL'}</span>
                 </div>
@@ -1631,10 +1822,13 @@ export default function App() {
         </section>
       </main>
 
-      <footer style={{ padding:'96px 48px', borderTop:`1px solid ${t.border}`, textAlign:'center' }}>
+      <footer className="site__footer">
         <span style={μ(t.textMuted)}>SYSTEM_v1.7 // PARAMETERS_STABLE</span>
       </footer>
       </>)}
+
+      {/* Glossary off-canvas */}
+      {glossaryTag && <GlossaryPanel tag={glossaryTag} t={t} onClose={closeGlossary} />}
     </div>
   );
 }
