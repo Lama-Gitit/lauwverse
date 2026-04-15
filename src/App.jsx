@@ -238,6 +238,11 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
   const rafRef    = useRef(null);
   const stateRef  = useRef(null);
 
+  // Store mutable props in refs so the render loop reads them live
+  // without the useEffect needing to restart
+  const propsRef = useRef({ density });
+  propsRef.current = { density };
+
   useEffect(() => {
     const isDark = theme === 'midnight';
     const canvas = canvasRef.current;
@@ -294,10 +299,13 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
       { factor: 0.35, scale: 0.80, opacity: 1.00, groundBase: 0.98 },
     ];
 
+    // Pre-generate a large pool of trees per layer (max density 500)
+    // At render time, only draw up to propsRef.current.density
+    const maxDensity = 500;
     const treeLayers = layerConfigs.map((cfg, layerIdx) => {
-      const count = Math.round(density * cfg.factor);
+      const poolSize = Math.round(maxDensity * cfg.factor);
       const rng = seededRng(layerIdx * 7919 + 1);
-      const trees = Array.from({ length: count }, () => {
+      const trees = Array.from({ length: poolSize }, () => {
         const cx = rng();
         const centerDip = valleyCurve(cx);
         const baseH = 120 + centerDip * 280;
@@ -305,7 +313,7 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
         const groundY = cfg.groundBase + (rng() - 0.5) * 0.03;
         return { cx, baseH, scaleVar, groundY };
       });
-      return { trees, scale: cfg.scale, opacity: cfg.opacity };
+      return { trees, factor: cfg.factor, scale: cfg.scale, opacity: cfg.opacity };
     });
 
     // ── draw blueprint tree via Path2D ───────────────────────────────────────
@@ -411,12 +419,14 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
       }
 
       // ── layered treeline — back to front, increasing darkness ──
+      const curDensity = propsRef.current.density;
       for (const layer of treeLayers) {
+        const count = Math.round(curDensity * layer.factor);
         const layerAlpha = isDark ? layer.opacity : layer.opacity * 0.35;
         const treeCol = isDark
           ? alpha(PALETTE.jaguar[950], layerAlpha)
           : alpha(PALETTE.jaguar[300], layerAlpha * 0.6);
-        for (const tr of layer.trees) drawBlueprintTree(ctx, tr, layer.scale, w, h, treeCol);
+        for (let i = 0; i < count && i < layer.trees.length; i++) drawBlueprintTree(ctx, layer.trees[i], layer.scale, w, h, treeCol);
       }
 
       // particles — subtle floating diamonds above treeline
@@ -465,7 +475,7 @@ const HeroScene = ({ scrollY, theme, density = 300 }) => {
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
     };
-  }, [theme, density]);
+  }, [theme]);
 
   return (
     <canvas
@@ -1125,7 +1135,8 @@ export default function App() {
   const [theme, setTheme]           = useState('midnight');
   const [emailCopied, setEmailCopied] = useState(false);
   const [page, setPage]             = useState('home');
-  const [treeDensity, setTreeDensity] = useState(300);
+  const treeDensityTarget = useRef(200 + Math.floor(Math.random() * 200)).current;
+  const [treeDensity, setTreeDensity] = useState(20);
   const [mousePos, setMousePos]     = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered]   = useState(false);
   const [scrollY, setScrollY]       = useState(0);
@@ -1135,6 +1146,23 @@ export default function App() {
 
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimerRef = useRef(null);
+
+  // Animate tree density from sparse → target over ~60 seconds (feels alive)
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const duration = 60000;
+    const from = 20;
+    const to = treeDensityTarget;
+    const ease = (t) => 1 - Math.pow(1 - t, 2.5); // gentle ease-out
+    const tick = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      setTreeDensity(Math.round(from + (to - from) * ease(progress)));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [treeDensityTarget]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -1363,24 +1391,6 @@ export default function App() {
         {/* HERO — full width */}
         <section className="animate-in" style={{ minHeight:'60vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', paddingTop:120, position:'relative', overflow:'hidden' }}>
           <HeroScene scrollY={scrollY} theme={theme} density={treeDensity} />
-
-          {/* TREELINE CONFIG */}
-          <div style={{
-            position:'absolute', bottom:24, right:24, zIndex:2,
-            background: alpha(t.bg, 0.85), backdropFilter:'blur(8px)',
-            border:`1px solid ${t.border}`, padding:'16px 20px',
-            display:'flex', flexDirection:'column', gap:12, minWidth:180,
-          }}>
-            <span style={μ(t.accentLabel)}>TREELINE</span>
-            <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
-              <div style={{ display:'flex', justifyContent:'space-between' }}>
-                <span style={μ(t.textMuted, { fontSize:10 })}>DENSITY</span>
-                <span style={μ(t.textFaint, { fontSize:10 })}>{treeDensity}</span>
-              </div>
-              <input type="range" min="50" max="400" step="5"
-                value={treeDensity} onChange={e => setTreeDensity(+e.target.value)} />
-            </div>
-          </div>
 
           {/* HERO TITLE — parallax cross */}
           <div style={{ display:'flex', flexDirection:'column', marginBottom:48, position:'relative', zIndex:1 }}>
