@@ -1484,6 +1484,23 @@ export default function App() {
   const [activeSection, setActiveSection] = useState(null);
   const scrollTimerRef = useRef(null);
 
+  // Animate tree density from sparse → target over ~60 seconds (feels alive)
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const duration = 60000;
+    const from = 20;
+    const to = treeDensityTarget;
+    const ease = (t) => 1 - Math.pow(1 - t, 2.5); // gentle ease-out
+    const tick = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      setTreeDensity(Math.round(from + (to - from) * ease(progress)));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [treeDensityTarget]);
+
   useEffect(() => {
     const onScroll = () => {
       setScrollY(window.scrollY);
