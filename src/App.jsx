@@ -793,16 +793,19 @@ const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
 
     if (variant === 'noise') {
       // ── Pre-generate particle field (once) ──────────────────────────────────
-      const CELL = 2;                        // smaller pixels
-      const BUILD_SECS = 30;                 // signal fully built after 30s
-      const NUM_LINES  = 4;
-      const LINE_GAP   = 9;                  // vertical gap between signal lines
+      const CELL       = 2;
+      const NUM_LINES  = 8;
+      const LINE_DELAY = 10;     // seconds between each line appearing
+      const SWEEP_SECS = 2.5;    // each line sweeps center→outward over this duration
+      const TOP_Y_FRAC = 0.62;   // top line sits just above responsibilities box (~65% down)
+      const WIDTH_MIN  = 0.82;   // top line: slightly wider than the responsibilities box (~80%)
+      const WIDTH_MAX  = 0.96;   // bottom line reaches near canvas edges
 
       const W = c.offsetWidth, H = c.offsetHeight;
       const particles = [];
       for (let y = 0; y < H; y += CELL) {
         const rowFade = Math.pow(1 - y / H, 1.6);
-        const density = rowFade * 0.45;      // slightly less dense at 2px
+        const density = rowFade * 0.45;
         for (let x = 0; x < W; x += CELL) {
           if (Math.random() > density) continue;
           particles.push({
@@ -823,16 +826,15 @@ const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
         if (startT === null) startT = T;
 
         const elapsed = T - startT;
-        const raw = Math.min(1, elapsed / BUILD_SECS);
-        // Ease-out cubic so the build feels organic, not mechanical
-        const buildProgress = 1 - Math.pow(1 - raw, 3);
-        const built = raw >= 1;              // true once fully built
+        // All lines fully revealed after last line completes its sweep
+        const totalDuration = (NUM_LINES - 1) * LINE_DELAY + SWEEP_SECS;
+        const built = elapsed >= totalDuration;
 
         const w = c.offsetWidth, h = c.offsetHeight;
         ctx.clearRect(0, 0, w, h);
 
-        // Noise: always flickers; once signal is built, dims slightly
-        const noiseDim = built ? 0.78 : 1;
+        // Noise: always flickers; dims slightly once all lines are built
+        const noiseDim = built ? 0.72 : 1;
         for (const p of particles) {
           const flicker = 0.5 + 0.5 * Math.sin(T * p.speed + p.phase);
           const a = p.weight * flicker * (p.isAccent ? 0.45 : 0.22) * noiseDim;
@@ -841,30 +843,33 @@ const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
           ctx.fillRect(p.x, p.y, CELL, CELL);
         }
 
-        // Signal lines: anchored to the bottom edge of the hero, grow center→out
-        // i=0 is the bottom-most line (right against the border), stacks upward.
-        // Each line has a staggered start so they cascade up from the border.
+        // Signal lines: top→bottom, i=0 is top (narrow), i=7 is bottom (widest)
+        // Each line waits LINE_DELAY*i seconds before sweeping out.
         for (let i = 0; i < NUM_LINES; i++) {
-          // Stagger: bottom line (i=0) starts first, upper lines follow
-          const staggerStart = i * (0.18 / NUM_LINES);
-          const lineRaw = Math.min(1, Math.max(0, (raw - staggerStart) / (1 - staggerStart)));
-          const lineP   = 1 - Math.pow(1 - lineRaw, 2);  // ease-out quad per line
-          if (lineP <= 0) continue;
+          const lineStart   = i * LINE_DELAY;
+          const lineElapsed = elapsed - lineStart;
+          if (lineElapsed <= 0) continue;  // not yet time for this line
 
-          // y position: anchored to bottom, stacking upward
-          const lineY = h - 2 - i * LINE_GAP;
+          // Ease-out quad sweep progress (0→1 over SWEEP_SECS)
+          const sweepRaw = Math.min(1, lineElapsed / SWEEP_SECS);
+          const sweepP   = 1 - Math.pow(1 - sweepRaw, 2);
 
-          // Width grows from center outward
-          const reach = (w / 2 - w * 0.04) * lineP;
+          // y: evenly distributed from TOP_Y_FRAC to h-2
+          const t_frac = i / (NUM_LINES - 1);
+          const lineY  = TOP_Y_FRAC * h + (h - 2 - TOP_Y_FRAC * h) * t_frac;
 
-          // Opacity: bottom line is brightest (it's the "main" signal)
-          const baseA = 0.20 - i * 0.03;
-          const lineA = built
-            ? baseA + 0.02 * (0.5 + 0.5 * Math.sin(T * 0.5 + i * 0.9)) // gentle pulse after build
-            : baseA * lineP;
+          // Width: grows from WIDTH_MIN (top) to WIDTH_MAX (bottom)
+          const widthFrac = WIDTH_MIN + (WIDTH_MAX - WIDTH_MIN) * t_frac;
+          const reach = (widthFrac * w / 2) * sweepP;
 
-          ctx.strokeStyle = `rgba(${aRgb[0]},${aRgb[1]},${aRgb[2]},${lineA.toFixed(3)})`;
-          ctx.lineWidth = i === 0 ? 1.5 : 0.75;
+          // Opacity: bottom lines slightly brighter; gentle pulse once built
+          const baseA  = 0.13 + t_frac * 0.10;
+          const pulseA = built
+            ? baseA + 0.018 * Math.sin(T * 0.45 + i * 0.7)
+            : baseA * sweepP;
+
+          ctx.strokeStyle = `rgba(${aRgb[0]},${aRgb[1]},${aRgb[2]},${pulseA.toFixed(3)})`;
+          ctx.lineWidth   = 0.75 + t_frac * 0.75;  // bottom lines slightly heavier
           ctx.beginPath();
           ctx.moveTo(w / 2 - reach, lineY);
           ctx.lineTo(w / 2 + reach, lineY);
