@@ -1,8 +1,11 @@
 import { PALETTE, TYPE, alpha } from '../tokens.js';
 import { Tag, SectionHeader, HeroBgCanvas, ArrowUpRight } from '../components/shared.jsx';
 
+// ─── Style shorthand helpers (module-scope — created once, not per render) ────
+/** @param {string} color @param {Object} [extra] @returns {Object} */
+const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
+
 const CaseStudy = ({ study, t, onBack, onTagClick }) => {
-  const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
 
   return (
     <div className="animate-in">

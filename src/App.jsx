@@ -567,6 +567,14 @@ const LabCard = ({ project, theme, t, onTagClick, onNavigate }) => {
   );
 };
 
+// ─── Style shorthand helpers (module-scope — created once, not per render) ────
+/** @param {string} color @param {Object} [extra] @returns {Object} */
+const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });   // micro label
+/** @param {string} color @param {Object} [extra] @returns {Object} */
+const τ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.2em', color, ...extra });   // tiny label
+/** @param {string} color @param {Object} [extra] @returns {Object} */
+const β = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.5em', color, ...extra });   // btn
+
 // ─── APP ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [theme, setTheme]           = useState('midnight');
@@ -674,11 +682,6 @@ export default function App() {
     { year: '2020-NOW',  entity: 'LAUW_STUDIO',   role: 'Design Partner',   tags: ['AI', 'PRODUCT', 'VIBE CODE'] },
     { year: '2011-2025', entity: 'LEAD_DESIGNER',  role: 'UX/UI Design',    tags: ['WCAG', 'ENTERPRISE', 'BEHAVIOR', 'DESIGN SYSTEMS'] },
   ];
-
-  // Mono style shortcuts (based on TYPE.mono.sm)
-  const μ     = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });   // micro label
-  const τ     = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.2em', color, ...extra });   // tiny label
-  const β     = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.5em', color, ...extra });   // btn
 
   const isGlitching = isHovered || isScrolling;
 

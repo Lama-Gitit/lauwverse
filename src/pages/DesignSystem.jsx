@@ -1,9 +1,13 @@
 import { PALETTE, THEMES, TYPE, alpha, contrastText } from '../tokens.js';
 import { Tag, SectionHeader, SectionLabel, StatusBadge, ExternalLink } from '../components/shared.jsx';
 
+// ─── Style shorthand helpers (module-scope — created once, not per render) ────
+/** @param {string} color @param {Object} [extra] @returns {Object} */
+const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
+/** @param {string} color @param {Object} [extra] @returns {Object} */
+const β = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.5em', color, ...extra });
+
 const DesignSystem = ({ t, onBack }) => {
-  const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
-  const β = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.5em', color, ...extra });
 
   const headingWeights = [
     { weight: 400, label: 'Regular 400' },
