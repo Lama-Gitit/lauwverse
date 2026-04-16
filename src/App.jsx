@@ -201,6 +201,7 @@ const Tag = ({ children, t, size = 'sm', onClick }) => (
   <span className={`tag tag--${size}${onClick ? ' tag--clickable' : ''}`}
     style={{ '--tag-color': t.accentLabel }}
     onClick={onClick}
+    onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e); } } : undefined}
     role={onClick ? 'button' : undefined}
     tabIndex={onClick ? 0 : undefined}
   >{children}</span>
@@ -763,6 +764,18 @@ const CASE_STUDIES = {
   },
 };
 
+// ─── SECTION HEADER (shared between CaseStudy + DesignSystem) ────────────────
+// Hoisted to module scope — defining inside a component remounts on every render.
+const SectionHeader = ({ num, title, sub, t }) => (
+  <div style={{ display:'flex', alignItems:'center', justifyContent: sub ? 'space-between' : 'flex-start', gap:16, marginBottom:48, borderBottom:`1px solid ${t.border}`, paddingBottom:10 }}>
+    <div style={{ display:'flex', alignItems:'baseline', gap:16 }}>
+      <span style={{ ...TYPE.mono.sm, letterSpacing:'0.4em', color:t.accentFaint }}>{num}</span>
+      <span style={{ ...TYPE.mono.sm, fontSize:12, letterSpacing:'0.35em', color:t.text }}>{title}</span>
+    </div>
+    {sub && <span style={{ ...TYPE.mono.sm, fontSize:12, color:t.textFaint }}>{sub}</span>}
+  </div>
+);
+
 // ─── CASE STUDY PAGE ─────────────────────────────────────────────────────────
 // variant: 'noise' (animated) | 'signal' (static) | 'grid' (static)
 const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
@@ -936,18 +949,11 @@ const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
     };
   }, [theme, variant]);
 
-  return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }} />;
+  return <canvas ref={ref} aria-hidden="true" style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }} />;
 };
 
 const CaseStudy = ({ study, t, onBack, onTagClick }) => {
   const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
-
-  const SectionHeader = ({ num, title }) => (
-    <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:48, borderBottom:`1px solid ${t.border}`, paddingBottom:10 }}>
-      <span style={μ(t.accentFaint)}>{num}</span>
-      <span style={μ(t.text, { fontSize:12, letterSpacing:'0.35em' })}>{title}</span>
-    </div>
-  );
 
   return (
     <div className="animate-in">
@@ -962,9 +968,11 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
             onMouseLeave={e => e.currentTarget.style.color = t.textMuted}
           >← RETURN</button>
 
-          {/* Headline: outline + filled */}
-          <h1 style={{ fontSize:'clamp(2.8rem,8vw,5.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:'transparent', WebkitTextStroke:t.stroke, lineHeight:0.85 }}>{study.headline.outline}</h1>
-          <h1 style={{ fontSize:'clamp(2.8rem,8vw,5.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:t.text, lineHeight:0.85 }}>{study.headline.filled}</h1>
+          {/* Headline: single h1, two visual spans — outline + filled */}
+          <h1 style={{ fontSize:'clamp(2.8rem,8vw,5.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', margin:0 }}>
+            <span style={{ display:'block', color:'transparent', WebkitTextStroke:t.stroke, lineHeight:0.85 }}>{study.headline.outline}</span>
+            <span style={{ display:'block', color:t.text, lineHeight:0.85 }}>{study.headline.filled}</span>
+          </h1>
 
           {/* Subline + Visit CTA */}
           <div style={{ marginTop:32, display:'flex', alignItems:'baseline', justifyContent:'space-between', gap:32, flexWrap:'wrap' }}>
@@ -1040,7 +1048,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
 
       {/* ── 01 CHALLENGE ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="01" title={`CHALLENGE // ${study.challenge.title}`} />
+        <SectionHeader num="01" title={`CHALLENGE // ${study.challenge.title}`} t={t} />
         <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:64 }}>
           <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
             {study.challenge.paragraphs.map((p, i) => (
@@ -1062,7 +1070,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
 
       {/* ── 02 SOLUTION ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="02" title="SOLUTION // WHAT WE BUILT" />
+        <SectionHeader num="02" title="SOLUTION // WHAT WE BUILT" t={t} />
 
         {/* Feature grid */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}`, marginBottom:48 }}>
@@ -1098,7 +1106,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
 
       {/* ── 03 PROCESS ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="03" title="PROCESS // HOW WE GOT HERE" />
+        <SectionHeader num="03" title="PROCESS // HOW WE GOT HERE" t={t} />
 
         {/* Vertical timeline — no hover, not clickable */}
         <div style={{ display:'flex', flexDirection:'column', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
@@ -1129,7 +1137,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
 
       {/* ── 04 IMPACT ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="04" title="IMPACT // WHAT HAPPENED" />
+        <SectionHeader num="04" title="IMPACT // WHAT HAPPENED" t={t} />
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64 }}>
           {/* Bullets */}
@@ -1152,7 +1160,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
 
       {/* ── Closing visual gallery ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="05" title="VISUALS // THE CRAFT" />
+        <SectionHeader num="05" title="VISUALS // THE CRAFT" t={t} />
 
         {/* Full-width feature image */}
         <div style={{ border:`1px solid ${t.border}`, aspectRatio:'21/9', display:'flex', alignItems:'center', justifyContent:'center', background:t.bgSurface, marginBottom:1 }}>
@@ -1254,16 +1262,6 @@ const DesignSystem = ({ t, onBack }) => {
     ]},
   ];
 
-  const SectionHeader = ({ num, title, sub }) => (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:48, borderBottom:`1px solid ${t.border}`, paddingBottom:10 }}>
-      <div style={{ display:'flex', alignItems:'baseline', gap:16 }}>
-        <span style={μ(t.accentFaint)}>{num}</span>
-        <span style={μ(t.text, { fontSize:12, letterSpacing:'0.35em' })}>{title}</span>
-      </div>
-      <span style={μ(t.textFaint, { fontSize:12 })}>{sub}</span>
-    </div>
-  );
-
   return (
     <div style={{ maxWidth:960, margin:'0 auto', padding:'160px 24px 160px' }}>
 
@@ -1282,7 +1280,7 @@ const DesignSystem = ({ t, onBack }) => {
 
       {/* ── 01 TYPOGRAPHY ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="01" title="FOUNDATION // TYPE" sub="Syne + Inter + JetBrains Mono" />
+        <SectionHeader num="01" title="FOUNDATION // TYPE" sub="Syne + Inter + JetBrains Mono" t={t} />
 
         {/* Font family cards — one card per typeface */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}`, marginBottom:64 }}>
@@ -1391,7 +1389,7 @@ const DesignSystem = ({ t, onBack }) => {
 
       {/* ── 02 COLOR SYSTEM ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="02" title="FOUNDATION // COLOR" sub="Palette 50→950 · WCAG" />
+        <SectionHeader num="02" title="FOUNDATION // COLOR" sub="Palette 50→950 · WCAG" t={t} />
 
         {/* Palette scales — swatches with WCAG contrast text */}
         {paletteScales.map(scale => (
@@ -1448,7 +1446,7 @@ const DesignSystem = ({ t, onBack }) => {
 
       {/* ── 03 TAGS ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="03" title="COMPONENTS // TAGS" sub="SM · MD · LG : Default + Hover" />
+        <SectionHeader num="03" title="COMPONENTS // TAGS" sub="SM · MD · LG : Default + Hover" t={t} />
 
         {/* Tag sizes — full width showcase */}
         <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
@@ -1480,7 +1478,7 @@ const DesignSystem = ({ t, onBack }) => {
 
       {/* ── 04 BUTTONS & LINKS ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="04" title="COMPONENTS // ACTIONS" sub="Buttons · Links · Navigation" />
+        <SectionHeader num="04" title="COMPONENTS // ACTIONS" sub="Buttons · Links · Navigation" t={t} />
 
         {/* Buttons — state matrix */}
         <div style={{ display:'flex', flexDirection:'column', border:`1px solid ${t.border}` }}>
@@ -1547,7 +1545,7 @@ const DesignSystem = ({ t, onBack }) => {
 
       {/* ── 05 INDICATORS & STATUS ── */}
       <section style={{ marginBottom:128 }}>
-        <SectionHeader num="05" title="COMPONENTS // STATUS" sub="Indicators · Badges" />
+        <SectionHeader num="05" title="COMPONENTS // STATUS" sub="Indicators · Badges" t={t} />
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
           {/* Active indicator */}
@@ -1608,7 +1606,7 @@ const DesignSystem = ({ t, onBack }) => {
 
       {/* ── 06 SPACING & GRID ── */}
       <section style={{ marginBottom:64 }}>
-        <SectionHeader num="06" title="FOUNDATION // LAYOUT" sub="Grid · Spacing · Borders" />
+        <SectionHeader num="06" title="FOUNDATION // LAYOUT" sub="Grid · Spacing · Borders" t={t} />
 
         <div style={{ display:'flex', flexDirection:'column', gap:48 }}>
           {/* Grid system */}
@@ -1979,7 +1977,7 @@ export default function App() {
   const [theme, setTheme]           = useState('midnight');
   const [emailCopied, setEmailCopied] = useState(false);
   const [page, setPage]             = useState('home');
-  const treeDensityTarget = useRef(200 + Math.floor(Math.random() * 200)).current;
+  const [treeDensityTarget] = useState(() => 200 + Math.floor(Math.random() * 200));
   const [treeDensity, setTreeDensity] = useState(20);
   const fogLevel = 75;
   const fogTopOpacity = 0;
@@ -2054,12 +2052,11 @@ export default function App() {
     });
   };
 
-  const copyEmail = () => {
-    try { navigator.clipboard.writeText('hello@lauwverse.io'); } catch {
-      const el = document.createElement('textarea');
-      el.value = 'hello@lauwverse.io';
-      document.body.appendChild(el); el.select();
-      document.execCommand('copy'); document.body.removeChild(el);
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText('hello@lauwverse.io');
+    } catch {
+      // Clipboard API unavailable — still show feedback so UX doesn't break
     }
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2000);
@@ -2113,10 +2110,10 @@ export default function App() {
       {/* ── NAV ──────────────────────────────────────────────────────────── */}
       <header>
       <nav className="nav">
-        <div className="nav__brand" onClick={() => window.scrollTo({ top:0, behavior:'smooth' })}>
+        <button className="nav__brand" onClick={() => window.scrollTo({ top:0, behavior:'smooth' })} aria-label="Back to top">
           <div className="nav__pulse" />
           <span style={{ ...μ(t.text), transition:'color 0.5s ease' }}>LAUWVERSE</span>
-        </div>
+        </button>
         <div className="nav__links">
           {[{ label:'LAB', id:'lab' }, { label:'SIGNAL', id:'signal' }, { label:'ORIGIN', id:'protocol' }].map(({ label, id }) => (
             <button key={id}
@@ -2181,7 +2178,7 @@ export default function App() {
           </div>
         </section>
 
-      <main className="main">
+      <main id="main-content" className="main">
 
         {/* LAB ARTIFACTS */}
         <section id="lab" className="section section--lab">
@@ -2243,7 +2240,7 @@ export default function App() {
                 onMouseLeave={e => { if (signalFilter !== type) { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.color = t.textFaint; }}}
               >{type}</button>
             ))}
-            <span className="signal__count" style={{ ...TYPE.mono.sm, fontSize:'0.5625rem', letterSpacing:'0.2em', color:t.textFaint }}>
+            <span className="signal__count" aria-live="polite" aria-atomic="true" style={{ ...TYPE.mono.sm, fontSize:'0.5625rem', letterSpacing:'0.2em', color:t.textFaint }}>
               {filteredSignal.length} ENTRIES
             </span>
           </div>
@@ -2388,13 +2385,16 @@ export default function App() {
                 </div>
                 <ArrowUpRight size={14} style={{ color:t.accent }} />
               </a>
-              <button className="connect__item" onClick={copyEmail}>
+              <button className="connect__item" onClick={copyEmail} aria-label={emailCopied ? 'Email copied' : 'Copy email address'}>
                 <div className="connect__item-info">
                   <Mail size={14} style={{ color:t.textMuted }} />
-                  <span style={β(t.textSecondary)}>{emailCopied ? 'EMAIL_SYNCED' : 'VAULT_EMAIL'}</span>
+                  <span style={β(t.textSecondary)} aria-hidden="true">{emailCopied ? 'EMAIL_SYNCED' : 'VAULT_EMAIL'}</span>
                 </div>
-                <Check size={14} style={{ color:t.accent, opacity: emailCopied ? 1 : 0, transition:'opacity 0.3s' }} />
+                <Check size={14} style={{ color:t.accent, opacity: emailCopied ? 1 : 0, transition:'opacity 0.3s' }} aria-hidden="true" />
               </button>
+              <span className="sr-only" aria-live="assertive" aria-atomic="true">
+                {emailCopied ? 'Email address copied to clipboard' : ''}
+              </span>
             </div>
           </div>
         </section>
