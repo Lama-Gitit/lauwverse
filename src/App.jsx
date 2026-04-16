@@ -1401,7 +1401,7 @@ const LabCanvas = ({ type, theme, animating = false }) => {
 const LAB_FEATURED = [
   {
     title: 'KIZUNA',
-    desc: 'Discord-native community intelligence platform. Turns messages, voice hours, and real contribution into automatic recognition through Smart Raffles. Free for any community that wants behavior over vanity metrics.',
+    desc: 'Discord-native community intelligence platform. Turns messages, voice hours, and real contribution into automatic recognition through Smart Raffles.',
     url: 'https://www.kizuna.gg',
     tags: ['COMMUNITY AI', 'PRODUCT'],
     status: 'LIVE',
