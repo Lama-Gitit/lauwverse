@@ -797,7 +797,8 @@ const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
       const NUM_LINES  = 8;
       const LINE_DELAY = 10;     // seconds between each line appearing
       const SWEEP_SECS = 2.5;    // each line sweeps center→outward over this duration
-      const TOP_Y_FRAC = 0.62;   // top line sits just above responsibilities box (~65% down)
+      const TOP_Y_FRAC = 0.733;  // first line ~80px lower (y≈517 in 705px canvas)
+      const BOT_Y_FRAC = 0.977;  // last line ~16px from bottom border (y≈689)
       const WIDTH_MIN  = 0.82;   // top line: slightly wider than the responsibilities box (~80%)
       const WIDTH_MAX  = 0.96;   // bottom line reaches near canvas edges
 
@@ -854,9 +855,9 @@ const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
           const sweepRaw = Math.min(1, lineElapsed / SWEEP_SECS);
           const sweepP   = 1 - Math.pow(1 - sweepRaw, 2);
 
-          // y: evenly distributed from TOP_Y_FRAC to h-2
+          // y: evenly distributed from TOP_Y_FRAC to BOT_Y_FRAC (compact band)
           const t_frac = i / (NUM_LINES - 1);
-          const lineY  = TOP_Y_FRAC * h + (h - 2 - TOP_Y_FRAC * h) * t_frac;
+          const lineY  = (TOP_Y_FRAC + (BOT_Y_FRAC - TOP_Y_FRAC) * t_frac) * h;
 
           // Width: grows from WIDTH_MIN (top) to WIDTH_MAX (bottom)
           const widthFrac = WIDTH_MIN + (WIDTH_MAX - WIDTH_MIN) * t_frac;
