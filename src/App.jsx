@@ -762,14 +762,20 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
         <h1 style={{ fontSize:'clamp(3.5rem,10vw,7.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:t.text, lineHeight:0.85 }}>{study.headline.filled}</h1>
 
         {/* Subline */}
-        <p style={{ ...μ(t.textMuted, { fontSize:12, lineHeight:2 }), maxWidth:520, marginTop:32 }}>
+        <p style={{ ...μ(t.textSecondary, { fontSize:12, lineHeight:2 }), maxWidth:520, marginTop:32 }}>
           {study.subline}
         </p>
 
-        {/* Role + Timeline */}
-        <div style={{ display:'flex', gap:32, marginTop:24, flexWrap:'wrap' }}>
-          <span style={μ(t.accentLabel, { fontSize:10 })}>{study.role}</span>
-          <span style={μ(t.textFaint, { fontSize:10 })}>{study.timeline}</span>
+        {/* Role + Timeline cluster */}
+        <div style={{ display:'flex', gap:1, marginTop:24, background:t.border, border:`1px solid ${t.border}`, width:'fit-content' }}>
+          {study.role.split(' · ').map((role, i) => (
+            <div key={i} style={{ background:t.bg, padding:'8px 16px' }}>
+              <span style={μ(t.accentLabel, { fontSize:9 })}>{role.toUpperCase()}</span>
+            </div>
+          ))}
+          <div style={{ background:t.bgSurface, padding:'8px 16px' }}>
+            <span style={μ(t.textFaint, { fontSize:9 })}>{study.timeline.toUpperCase()}</span>
+          </div>
         </div>
 
         {/* Tags */}
@@ -779,8 +785,13 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
           ))}
         </div>
 
+        {/* Hero image slot */}
+        <div style={{ marginTop:48, border:`1px solid ${t.border}`, aspectRatio:'21/9', display:'flex', alignItems:'center', justifyContent:'center', background:t.bgSurface }}>
+          <span style={μ(t.textFaint, { fontSize:10 })}>HERO IMAGE / COVER VISUAL</span>
+        </div>
+
         {/* Metric cards */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:1, background:t.border, border:`1px solid ${t.border}`, marginTop:48 }}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:1, background:t.border, border:`1px solid ${t.border}`, marginTop:1 }}>
           {study.metrics.map((m, i) => (
             <div key={i} style={{ background:t.bg, padding:'32px 24px', display:'flex', flexDirection:'column', gap:8 }}>
               <span style={{ fontFamily:'Big Shoulders Display, Impact, sans-serif', fontSize:'clamp(2rem,5vw,3rem)', fontWeight:900, color:t.text, lineHeight:1 }}>{m.value}</span>
@@ -796,16 +807,21 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
         <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:64 }}>
           <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
             {study.challenge.paragraphs.map((p, i) => (
-              <p key={i} style={{ ...TYPE.body.md, color:t.textSecondary, lineHeight:1.8 }}>{p}</p>
+              <p key={i} style={{ ...TYPE.body.md, color:t.text, lineHeight:1.8 }}>{p}</p>
             ))}
           </div>
           <aside style={{ borderLeft:`1px solid ${t.border}`, paddingLeft:32, display:'flex', alignItems:'flex-start' }}>
-            <blockquote style={{ ...TYPE.body.intro, color:t.textMuted, fontStyle:'italic', lineHeight:1.8, margin:0 }}>
+            <blockquote style={{ ...TYPE.body.intro, color:t.textSecondary, fontStyle:'italic', lineHeight:1.8, margin:0 }}>
               "{study.challenge.pullQuote}"
             </blockquote>
           </aside>
         </div>
       </section>
+
+      {/* ── Image break: Challenge → Solution ── */}
+      <div style={{ marginBottom:128, border:`1px solid ${t.border}`, aspectRatio:'21/9', display:'flex', alignItems:'center', justifyContent:'center', background:t.bgSurface }}>
+        <span style={μ(t.textFaint, { fontSize:10 })}>CHALLENGE VISUAL / BEFORE STATE</span>
+      </div>
 
       {/* ── 02 SOLUTION ── */}
       <section style={{ marginBottom:128 }}>
@@ -816,38 +832,45 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
           {study.solution.features.map((f, i) => (
             <div key={i} style={{ background:t.bg, padding:'32px 24px', display:'flex', flexDirection:'column', gap:12 }}>
               <span style={μ(t.accentLabel, { fontSize:10 })}>{f.name}</span>
-              <p style={{ ...TYPE.body.sm, color:t.textMuted, lineHeight:1.7 }}>{f.desc}</p>
+              <p style={{ ...TYPE.body.sm, color:t.text, lineHeight:1.7 }}>{f.desc}</p>
             </div>
           ))}
         </div>
 
         {/* Differentiator */}
         <div style={{ borderLeft:`2px solid ${t.accent}`, paddingLeft:24, marginBottom:32 }}>
-          <p style={{ ...TYPE.body.md, color:t.textSecondary, lineHeight:1.8 }}>{study.solution.differentiator}</p>
+          <p style={{ ...TYPE.body.md, color:t.text, lineHeight:1.8 }}>{study.solution.differentiator}</p>
         </div>
 
         {/* Craft note */}
         <div style={{ padding:'24px', border:`1px solid ${t.border}`, background:t.bgSurface }}>
           <span style={μ(t.accentFaint, { fontSize:9, marginBottom:8, display:'block' })}>AI VS. CRAFT</span>
-          <p style={{ ...TYPE.body.sm, color:t.textMuted, lineHeight:1.7 }}>{study.solution.craftNote}</p>
+          <p style={{ ...TYPE.body.sm, color:t.text, lineHeight:1.7 }}>{study.solution.craftNote}</p>
         </div>
       </section>
+
+      {/* ── Image break: Solution → Process ── */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}`, marginBottom:128 }}>
+        <div style={{ background:t.bgSurface, aspectRatio:'16/10', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <span style={μ(t.textFaint, { fontSize:10 })}>DASHBOARD SCREENSHOT</span>
+        </div>
+        <div style={{ background:t.bgSurface, aspectRatio:'16/10', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <span style={μ(t.textFaint, { fontSize:10 })}>FEATURE DETAIL</span>
+        </div>
+      </div>
 
       {/* ── 03 PROCESS ── */}
       <section style={{ marginBottom:128 }}>
         <SectionHeader num="03" title="PROCESS // HOW WE GOT HERE" />
 
-        {/* Vertical timeline */}
+        {/* Vertical timeline — no hover, not clickable */}
         <div style={{ display:'flex', flexDirection:'column', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
           {study.process.map((step, i) => (
-            <div key={i} style={{ background:t.bg, padding:'28px 24px', display:'flex', alignItems:'flex-start', gap:24, borderLeft:`2px solid transparent`, transition:'border-color 0.2s, background 0.2s' }}
-              onMouseEnter={e => { e.currentTarget.style.borderLeftColor = t.accent; e.currentTarget.style.background = t.bgHover; }}
-              onMouseLeave={e => { e.currentTarget.style.borderLeftColor = 'transparent'; e.currentTarget.style.background = t.bg; }}
-            >
+            <div key={i} style={{ background:t.bg, padding:'28px 24px', display:'flex', alignItems:'flex-start', gap:24, borderLeft:`2px solid ${t.accent}` }}>
               <span style={μ(t.accentFaint, { fontSize:10, flexShrink:0, width:24 })}>{String(i + 1).padStart(2, '0')}</span>
               <div>
                 <span style={μ(t.text, { fontSize:11, letterSpacing:'0.3em', display:'block', marginBottom:8 })}>{step.phase}</span>
-                <p style={{ ...TYPE.body.sm, color:t.textMuted, lineHeight:1.7 }}>{step.desc}</p>
+                <p style={{ ...TYPE.body.sm, color:t.text, lineHeight:1.7 }}>{step.desc}</p>
               </div>
             </div>
           ))}
@@ -857,10 +880,15 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
         {study.ahaQuote && (
           <div style={{ marginTop:48, borderLeft:`2px solid ${t.accent}`, paddingLeft:24 }}>
             <span style={μ(t.accentFaint, { fontSize:9, display:'block', marginBottom:8 })}>AHA MOMENT</span>
-            <p style={{ ...TYPE.body.md, color:t.textSecondary, fontStyle:'italic', lineHeight:1.8 }}>{study.ahaQuote}</p>
+            <p style={{ ...TYPE.body.md, color:t.text, fontStyle:'italic', lineHeight:1.8 }}>{study.ahaQuote}</p>
           </div>
         )}
       </section>
+
+      {/* ── Image break: Process → Impact ── */}
+      <div style={{ marginBottom:128, border:`1px solid ${t.border}`, aspectRatio:'21/9', display:'flex', alignItems:'center', justifyContent:'center', background:t.bgSurface }}>
+        <span style={μ(t.textFaint, { fontSize:10 })}>PROCESS VISUAL / FIGMA BOARD</span>
+      </div>
 
       {/* ── 04 IMPACT ── */}
       <section style={{ marginBottom:128 }}>
@@ -872,7 +900,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
             {study.impact.bullets.map((b, i) => (
               <div key={i} style={{ background:t.bg, padding:'20px 24px', display:'flex', alignItems:'center', gap:16 }}>
                 <span style={μ(t.accentFaint, { fontSize:10 })}>{String(i + 1).padStart(2, '0')}</span>
-                <span style={{ ...TYPE.body.sm, color:t.textSecondary }}>{b}</span>
+                <span style={{ ...TYPE.body.sm, color:t.text }}>{b}</span>
               </div>
             ))}
           </div>
@@ -880,22 +908,26 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
           {/* Reflection */}
           <div style={{ display:'flex', flexDirection:'column', justifyContent:'center' }}>
             <span style={μ(t.accentFaint, { fontSize:9, marginBottom:12 })}>REFLECTION</span>
-            <p style={{ ...TYPE.body.md, color:t.textMuted, lineHeight:1.8 }}>{study.impact.reflection}</p>
+            <p style={{ ...TYPE.body.md, color:t.text, lineHeight:1.8 }}>{study.impact.reflection}</p>
           </div>
         </div>
       </section>
 
-      {/* ── 05 VISUALS ── */}
+      {/* ── Closing visual gallery ── */}
       <section style={{ marginBottom:128 }}>
         <SectionHeader num="05" title="VISUALS // THE CRAFT" />
 
-        {/* Placeholder slots for screenshots/assets */}
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
-          {['Dashboard Overview', 'Member Intelligence', 'Brand Identity', 'Design System'].map((label, i) => (
-            <div key={i} style={{ background:t.bg, aspectRatio:'16/10', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:12 }}>
+        {/* Full-width feature image */}
+        <div style={{ border:`1px solid ${t.border}`, aspectRatio:'21/9', display:'flex', alignItems:'center', justifyContent:'center', background:t.bgSurface, marginBottom:1 }}>
+          <span style={μ(t.textFaint, { fontSize:10 })}>BRAND IDENTITY / KEY VISUAL</span>
+        </div>
+
+        {/* 2-up detail grid */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}`, borderTop:'none' }}>
+          {['Dashboard Overview', 'Member Intelligence', 'Design System', 'Smart Raffles'].map((label, i) => (
+            <div key={i} style={{ background:t.bgSurface, aspectRatio:'16/10', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:12 }}>
               <span style={μ(t.textFaint, { fontSize:10 })}>{String(i + 1).padStart(2, '0')}</span>
               <span style={μ(t.accentFaint, { fontSize:9 })}>{label.toUpperCase()}</span>
-              <span style={{ ...TYPE.body.xs, color:t.textFaint }}>Asset placeholder</span>
             </div>
           ))}
         </div>
