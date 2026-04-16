@@ -218,6 +218,21 @@ const TAG_GLOSSARY = {
     tagline: 'Where behavior meets the machine.',
     body: 'Social AI is the space where human behavior and artificial intelligence actually touch. Not AI that replaces people, but AI that understands how groups think, talk, and connect. I care about this layer because it decides whether technology pulls us closer or pushes us apart.',
   },
+  'COMMUNITY AI': {
+    title: 'Community AI',
+    tagline: 'Intelligence built from the group up.',
+    body: 'Community AI uses the real signals a group generates, messages, voice time, reactions, contribution, to surface who is active, what matters, and what the community actually cares about. The goal is not to automate community management. The goal is to make invisible contribution visible so the right behavior gets recognized and reinforced.',
+  },
+  'BRAND': {
+    title: 'Brand',
+    tagline: 'The system that makes everything feel like one thing.',
+    body: 'Brand is not a logo or a color palette. It is the decision architecture that makes every touchpoint feel like it came from the same source. A strong brand compresses trust, because people already know what to expect. I build brand systems as behavioral infrastructure, starting from the identity a product needs to create, not the aesthetics a client wants to express.',
+  },
+  'NETWORK': {
+    title: 'Network',
+    tagline: 'Value that compounds with every node.',
+    body: 'A network is not a list of users. It is a system where each person added increases the value for everyone already there. Designing for network effects means designing for the interactions between people, not just the features they use alone. The hardest part is the cold start. The second hardest part is keeping the density once you have it.',
+  },
   'DESIGN': {
     title: 'Design',
     tagline: 'Clarity you can feel.',
@@ -394,10 +409,10 @@ const SectionLabel = ({ filled, outline, tagline, t }) => {
   };
   return (
     <div className="section-label">
-      <div className="section-label__titles">
-        <h2 style={{ ...baseStyle, color: t.text }}>{filled}</h2>
-        <h2 style={{ ...baseStyle, color: 'transparent', WebkitTextStroke: t.stroke }}>{outline}</h2>
-      </div>
+      <h2 className="section-label__titles" style={{ margin:0 }}>
+        <span style={{ ...baseStyle, color: t.text, display:'block' }}>{filled}</span>
+        <span style={{ ...baseStyle, color: 'transparent', WebkitTextStroke: t.stroke, display:'block' }}>{outline}</span>
+      </h2>
       {tagline && (
         <p className="section-label__tagline" style={{ ...TYPE.body.md, color: t.textMuted }}>{tagline}</p>
       )}
@@ -1621,25 +1636,27 @@ const LabCanvas = ({ type, theme, animating = false }) => {
 const LAB_FEATURED = [
   {
     title: 'KIZUNA',
-    desc: 'Community intelligence platform. Discord-native signal processing and activation.',
+    desc: 'Discord-native community intelligence platform. Turns messages, voice hours, and real contribution into automatic recognition through Smart Raffles.',
     url: '#kizuna',
-    tags: ['SOCIAL AI', 'DESIGN'],
+    tags: ['COMMUNITY AI', 'PRODUCT'],
+    status: 'LIVE',
     active: true,
     canvas: 'network',
   },
   {
     title: 'WOLVES',
-    desc: 'A pack for builders. Founders, creators, investors, and operators, sharpening each other.',
+    desc: 'Premier network for builders. Brand architecture and design system for a professional space where founders, creators, investors, and operators level up together.',
     url: 'https://www.wolves.co',
-    tags: ['WEB3', 'CULTURE'],
-    active: true,
+    tags: ['BRAND', 'NETWORK'],
+    status: 'LIVE',
+    active: false,
     canvas: 'swarm',
   },
 ];
 
 const LAB_INDEX = [
-  { title: 'LAUWVERSE.XYZ', desc: 'The lab. Where ideas, interfaces, and systems get built in the open.', url: '#', tags: ['VIBE_CODE'] },
-  { title: 'BRAND_OS', desc: 'The system behind everything Lauw builds. Tokens, typography, color, logo.', url: '#design', tags: ['DESIGN'] },
+  { title: 'LAUWVERSE_OS', desc: 'This site. Interactive portfolio, behavioral design playground, and living brand system.', url: '/case/lauwverse-os', tags: ['VIBE_CODE'], status: 'LIVE' },
+  { title: 'BRAND_OS', desc: 'Design token library and interactive primitives powering every Lauwverse surface.', url: '#design', tags: ['DESIGN'], status: 'v1.7' },
 ];
 
 // ─── LAB CARD (featured, with hover-activated canvas) ────────────────────────
@@ -1779,11 +1796,13 @@ export default function App() {
   };
 
   const signalLog = [
-    { date: '04.APR',  title: 'Lauwverse_Portfolio_Rebuild',      type: 'BUILD',   source: 'Self' },
-    { date: '01.APR',  title: 'Claude_Code_Skills_Architecture',  type: 'READING', source: 'Anthropic Docs' },
-    { date: '28.MAR',  title: 'Agentic_Interface_Sprint',         type: 'BUILD',   source: 'Kizuna' },
-    { date: '25.MAR',  title: 'Community_Signal_Processing',      type: 'THINKING',source: 'Research' },
-    { date: '22.MAR',  title: 'Neural_Design_Tokens_v2',          type: 'BUILD',   source: 'Brand OS' },
+    { date: '15.APR', title: 'Behavior_vs_Sentiment_Manifesto',  type: 'THINKING', source: 'Lauwverse',    note: 'Why sentiment is the wrong north star for AI products.',         link: '/signal/behavior-vs-sentiment' },
+    { date: '12.APR', title: 'Kizuna_v2_Spec_Sprint',            type: 'BUILD',    source: 'Kizuna',       note: 'Smart Raffles v2 and contribution signal tuning.',               link: null },
+    { date: '04.APR', title: 'Lauwverse_Portfolio_Rebuild',      type: 'BUILD',    source: 'Self',         note: 'New hero, expanded Lab, full SEO + GEO pass.',                  link: null },
+    { date: '01.APR', title: 'Claude_Code_Skills_Architecture',  type: 'READING',  source: 'Anthropic Docs', note: 'How Claude Code skill injection works under the hood.',        link: null },
+    { date: '28.MAR', title: 'Agentic_Interface_Sprint',         type: 'BUILD',    source: 'Kizuna',       note: 'Designing for AI agents as first-class users.',                 link: null },
+    { date: '25.MAR', title: 'Community_Signal_Processing',      type: 'THINKING', source: 'Research',     note: 'What real contribution looks like vs. what gets counted.',      link: null },
+    { date: '22.MAR', title: 'Neural_Design_Tokens_v2',          type: 'BUILD',    source: 'Brand OS',     note: 'Semantic token architecture for dual-theme systems.',           link: null },
   ];
 
   const signalTypes = ['ALL', 'BUILD', 'READING', 'THINKING'];
@@ -1855,25 +1874,39 @@ export default function App() {
         <section className="hero animate-in">
           <HeroScene scrollY={scrollY} theme={theme} density={treeDensity} fogLevel={fogLevel} fogTopOpacity={fogTopOpacity} fogBottomOpacity={fogBottomOpacity} />
 
-          {/* HERO TITLE — parallax cross */}
-          <div className="hero__titles">
-            <h1 style={{ ...TYPE.display.hero, lineHeight:0.7, color:t.text, transform:`translateY(${scrollY*0.12}px)`, willChange:'transform', transition:'color 0.5s ease' }}>PRIMAL</h1>
-            <div ref={textRef} onMouseMove={handleMouseMove} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => { setIsHovered(false); setMousePos({x:0,y:0}); }} style={{ display:'inline-block', overflow:'visible', transform:`translateY(${-scrollY*0.18}px)`, willChange:'transform' }}>
-              <h1 style={futureTitleStyle}>FUTURE.</h1>
-            </div>
-          </div>
+          {/* HERO TITLE — parallax cross (single semantic h1) */}
+          <h1 className="hero__titles">
+            <span style={{ ...TYPE.display.hero, color:t.text, transform:`translateY(${scrollY*0.12}px)`, willChange:'transform', transition:'color 0.5s ease', display:'block' }}>PRIMAL</span>
+            <span ref={textRef} onMouseMove={handleMouseMove} onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => { setIsHovered(false); setMousePos({x:0,y:0}); }} style={{ display:'inline-block', overflow:'visible', transform:`translateY(${-scrollY*0.18}px)`, willChange:'transform' }}>
+              <span style={{ ...futureTitleStyle, display:'block' }}>FUTURE.</span>
+            </span>
+          </h1>
 
-          {/* TAGLINE */}
-          <div className="hero__tagline">
-            <p className="hero__tagline-text" style={μ(t.textSecondary, { fontSize:12, letterSpacing:'0.35em' })}>
-              BUILDING AT THE INTERSECTION OF AI + DESIGN
-            </p>
+          {/* HERO INTRODUCTION — tagline + subline + actions */}
+          <div className="hero__intro">
+            <div className="hero__intro-copy">
+              <p className="hero__tagline-line" style={{ ...TYPE.body.xl, color:t.text }}>
+                Designing for behavior, not sentiment.
+              </p>
+              <p className="hero__subline" style={{ ...TYPE.mono.md, color:t.textMuted }}>
+                BEHAVIORAL PRODUCTS AND BRAND SYSTEMS FOR AI COMPANIES.
+              </p>
+            </div>
             <div className="hero__actions">
-              <button className="hero__cta hero__cta--primary" style={TYPE.label.md}>DISCOVER</button>
-              <button className="hero__cta hero__cta--secondary"
-                onClick={() => setPage('design')}
+              <button className="hero__cta hero__cta--primary"
+                onClick={() => document.getElementById('lab')?.scrollIntoView({ behavior:'smooth', block:'start' })}
                 style={TYPE.label.md}
-              >BRAND_OS →</button>
+              >
+                <span className="hero__cta-label">ENTER THE LAB</span>
+                <span className="hero__cta-shadow" aria-hidden="true" />
+              </button>
+              <button className="hero__cta hero__cta--secondary"
+                onClick={() => document.getElementById('signal')?.scrollIntoView({ behavior:'smooth', block:'start' })}
+                style={TYPE.mono.sm}
+              >
+                SIGNAL FEED
+                <span className="hero__cta-arrow" aria-hidden="true">→</span>
+              </button>
             </div>
           </div>
         </section>
@@ -1947,27 +1980,55 @@ export default function App() {
 
           {/* Log entries */}
           <ol className="signal__list">
-            {filteredSignal.map((entry, i) => (
-              <li key={`${entry.date}-${entry.title}`}
-                className="signal__entry signal__entry--animate"
-                style={{ animationDelay:`${i * 0.04}s` }}
-              >
-                <div className="signal__entry-info">
-                  <time style={τ(t.textMuted, { minWidth:56, flexShrink:0, fontSize:'0.6875rem' })}>{entry.date}</time>
-                  <h3 className="signal__entry-title">{entry.title}</h3>
-                </div>
-                <div className="signal__entry-meta">
-                  <span style={{ ...TYPE.mono.sm, fontSize:'0.5625rem', letterSpacing:'0.15em', color:t.textFaint, textTransform:'none' }}>{entry.source}</span>
-                  <Tag t={t} size="md" onClick={() => openGlossary(entry.type)}>{entry.type}</Tag>
-                </div>
-              </li>
-            ))}
+            {filteredSignal.map((entry, i) => {
+              const inner = (
+                <>
+                  <div className="signal__entry-info">
+                    <time style={τ(t.textMuted, { minWidth:56, flexShrink:0, fontSize:'0.6875rem' })}>{entry.date}</time>
+                    <div className="signal__entry-text">
+                      <h3 className="signal__entry-title">{entry.title}</h3>
+                      {entry.note && <p className="signal__entry-note" style={{ ...TYPE.body.sm, color:t.textMuted, marginTop:2 }}>{entry.note}</p>}
+                    </div>
+                  </div>
+                  <div className="signal__entry-meta">
+                    <span style={{ ...TYPE.mono.sm, fontSize:'0.5625rem', letterSpacing:'0.15em', color:t.textFaint, textTransform:'none' }}>{entry.source}</span>
+                    <Tag t={t} size="md" onClick={(e) => { e.preventDefault(); e.stopPropagation(); openGlossary(entry.type); }}>{entry.type}</Tag>
+                  </div>
+                </>
+              );
+              return entry.link ? (
+                <li key={`${entry.date}-${entry.title}`}
+                  className="signal__entry signal__entry--animate signal__entry--linked"
+                  style={{ animationDelay:`${i * 0.04}s` }}
+                >
+                  <a href={entry.link} className="signal__entry-link">{inner}</a>
+                </li>
+              ) : (
+                <li key={`${entry.date}-${entry.title}`}
+                  className="signal__entry signal__entry--animate"
+                  style={{ animationDelay:`${i * 0.04}s` }}
+                >
+                  {inner}
+                </li>
+              );
+            })}
           </ol>
         </section>
 
         {/* ── ORIGIN — Lineage + Process + Connect ── */}
         <section id="protocol" className="section section--origin">
           <SectionLabel filled="Origin" outline="Arc" tagline="How I got here. How I work. How to reach me." t={t} />
+
+          {/* ABOUT */}
+          <div className="origin__subsection" style={{ marginBottom:64 }}>
+            <h3 className="origin__subsection-title" style={μ(t.textFaint)}>ABOUT</h3>
+            <p style={{ ...TYPE.body.md, color:t.textSecondary, maxWidth:640, lineHeight:1.6 }}>
+              I'm Laurens, a product designer working at the intersection of behavioral design, UX/UI, and AI.
+              Lauwverse is my lab and my lens. I build products, interfaces, and brand systems for AI companies
+              and the teams building with AI, with one rule: design for behavior, not sentiment.
+              Kizuna, a community intelligence platform, is the current flagship coming out of the lab.
+            </p>
+          </div>
 
           {/* LINEAGE */}
           <div className="origin__subsection">
@@ -1999,7 +2060,7 @@ export default function App() {
               {[
                 {
                   phase: 'THINK', num: '01',
-                  desc: 'Where the problem gets dissolved. Pattern recognition before execution.',
+                  desc: 'Pattern recognition before execution. Map the behavior you want to create or break before touching a pixel. Example: before redesigning a Discord onboarding, audit which first-session actions predict month-two retention.',
                   tools: [
                     { name: 'Claude', url: 'https://claude.ai' },
                     { name: 'Perplexity', url: 'https://perplexity.ai' },
@@ -2008,7 +2069,7 @@ export default function App() {
                 },
                 {
                   phase: 'DESIGN', num: '02',
-                  desc: 'Translating intuition into spatial logic. Systems before aesthetics.',
+                  desc: 'Systems before aesthetics. Translate behavioral intent into spatial logic and reusable primitives. Example: every Kizuna screen starts from a signal, not a layout.',
                   tools: [
                     { name: 'Figma', url: 'https://figma.com' },
                     { name: 'Stitch', url: 'https://stitchdesign.io' },
@@ -2017,7 +2078,7 @@ export default function App() {
                 },
                 {
                   phase: 'BUILD', num: '03',
-                  desc: 'Shipping at the speed of thought. Vibe-code first, refine after.',
+                  desc: 'Ship at the speed of thought. Vibe-code first, refine after, instrument everything that matters. Example: this site was rebuilt, measured, and re-shipped inside a week.',
                   tools: [
                     { name: 'Claude', url: 'https://claude.ai' },
                     { name: 'Vercel', url: 'https://vercel.com' },
