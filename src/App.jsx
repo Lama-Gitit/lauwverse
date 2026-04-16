@@ -793,50 +793,82 @@ const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
 
     if (variant === 'noise') {
       // ── Pre-generate particle field (once) ──────────────────────────────────
-      // Each particle remembers its row-fade (density weight), whether it's an
-      // accent pixel, and unique phase+speed for the flicker sine wave.
-      const CELL = 4;
+      const CELL = 2;                        // smaller pixels
+      const BUILD_SECS = 30;                 // signal fully built after 30s
+      const NUM_LINES  = 4;
+      const LINE_GAP   = 9;                  // vertical gap between signal lines
+
       const W = c.offsetWidth, H = c.offsetHeight;
       const particles = [];
       for (let y = 0; y < H; y += CELL) {
         const rowFade = Math.pow(1 - y / H, 1.6);
-        const density = rowFade * 0.55;
+        const density = rowFade * 0.45;      // slightly less dense at 2px
         for (let x = 0; x < W; x += CELL) {
           if (Math.random() > density) continue;
           particles.push({
             x, y,
             isAccent: Math.random() < 0.15,
-            speed: 0.35 + Math.random() * 2.8,   // individual flicker rate
-            phase: Math.random() * Math.PI * 2,   // random start in the cycle
+            speed: 0.35 + Math.random() * 2.8,
+            phase: Math.random() * Math.PI * 2,
             weight: rowFade,
           });
         }
       }
 
       // ── RAF render loop ──────────────────────────────────────────────────────
+      let startT = null;
       const render = (now) => {
         rafRef.current = requestAnimationFrame(render);
         const T = now * 0.001;
+        if (startT === null) startT = T;
+
+        const elapsed = T - startT;
+        const raw = Math.min(1, elapsed / BUILD_SECS);
+        // Ease-out cubic so the build feels organic, not mechanical
+        const buildProgress = 1 - Math.pow(1 - raw, 3);
+        const built = raw >= 1;              // true once fully built
+
         const w = c.offsetWidth, h = c.offsetHeight;
         ctx.clearRect(0, 0, w, h);
 
+        // Noise: always flickers; once signal is built, dims slightly
+        const noiseDim = built ? 0.78 : 1;
         for (const p of particles) {
-          // Each pixel flickers at its own frequency — same feel as treeline stars
           const flicker = 0.5 + 0.5 * Math.sin(T * p.speed + p.phase);
-          const a = p.weight * flicker * (p.isAccent ? 0.45 : 0.22);
+          const a = p.weight * flicker * (p.isAccent ? 0.45 : 0.22) * noiseDim;
           const rgb = p.isAccent ? aRgb : bRgb;
           ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a.toFixed(3)})`;
           ctx.fillRect(p.x, p.y, CELL, CELL);
         }
 
-        // Pulsing signal lines that emerge at the bottom (noise → signal)
-        for (let i = 0; i < 4; i++) {
-          const lineY  = h * 0.82 + i * 10;
-          const pulse  = 0.5 + 0.5 * Math.sin(T * 1.1 + i * 0.75);
-          const lineA  = (0.08 + i * 0.05) * pulse;
+        // Signal lines: anchored to the bottom edge of the hero, grow center→out
+        // i=0 is the bottom-most line (right against the border), stacks upward.
+        // Each line has a staggered start so they cascade up from the border.
+        for (let i = 0; i < NUM_LINES; i++) {
+          // Stagger: bottom line (i=0) starts first, upper lines follow
+          const staggerStart = i * (0.18 / NUM_LINES);
+          const lineRaw = Math.min(1, Math.max(0, (raw - staggerStart) / (1 - staggerStart)));
+          const lineP   = 1 - Math.pow(1 - lineRaw, 2);  // ease-out quad per line
+          if (lineP <= 0) continue;
+
+          // y position: anchored to bottom, stacking upward
+          const lineY = h - 2 - i * LINE_GAP;
+
+          // Width grows from center outward
+          const reach = (w / 2 - w * 0.04) * lineP;
+
+          // Opacity: bottom line is brightest (it's the "main" signal)
+          const baseA = 0.20 - i * 0.03;
+          const lineA = built
+            ? baseA + 0.02 * (0.5 + 0.5 * Math.sin(T * 0.5 + i * 0.9)) // gentle pulse after build
+            : baseA * lineP;
+
           ctx.strokeStyle = `rgba(${aRgb[0]},${aRgb[1]},${aRgb[2]},${lineA.toFixed(3)})`;
-          ctx.lineWidth = i === 3 ? 1 : 0.5;
-          ctx.beginPath(); ctx.moveTo(w * 0.05, lineY); ctx.lineTo(w * 0.95, lineY); ctx.stroke();
+          ctx.lineWidth = i === 0 ? 1.5 : 0.75;
+          ctx.beginPath();
+          ctx.moveTo(w / 2 - reach, lineY);
+          ctx.lineTo(w / 2 + reach, lineY);
+          ctx.stroke();
         }
       };
       rafRef.current = requestAnimationFrame(render);
