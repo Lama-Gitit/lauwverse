@@ -666,6 +666,241 @@ const HeroScene = ({ scrollY, theme, density = 300, fogLevel = 80, fogTopOpacity
   );
 };
 
+// ─── CASE STUDY DATA ─────────────────────────────────────────────────────────
+const CASE_STUDIES = {
+  kizuna: {
+    slug: 'kizuna',
+    headline: { outline: 'FROM NOISE', filled: 'TO SIGNAL.' },
+    subline: 'Kizuna Intelligence for brands that want to listen.',
+    oneLiner: 'Community intelligence platform that turns Discord noise into actionable insights.',
+    role: 'Co-owner · Product Designer · Brand & Visual Identity · UX/UI · Strategy',
+    timeline: 'Ongoing',
+    metrics: [
+      { value: '100+', label: 'COMMUNITIES SERVED' },
+      { value: '—', label: 'SIGNALS PROCESSED' },
+      { value: '—', label: 'DESIGN SYSTEM' },
+    ],
+    challenge: {
+      title: 'THE BLIND SPOT',
+      paragraphs: [
+        'Running a Discord community means drowning in messages, memes, and spam with no clear way to see what actually matters. Community managers, founders, and operators were leading blind: manually scanning channels, guessing who their most valuable members were, and missing the signals buried in the noise.',
+        'The real problem isn\'t a lack of activity. It\'s a lack of understanding. Who\'s engaged? What\'s resonating? Which members deserve recognition? And most critically: how do you communicate in a way that strengthens the relationship instead of breaking it?',
+        'Communication makes or breaks the brand-to-community relationship. It\'s not about positive or negative. It\'s about being honest, upfront, and staying ahead of friction.',
+      ],
+      pullQuote: 'Leading blind. Reading every message, every day, and still missing what matters.',
+    },
+    solution: {
+      features: [
+        { name: 'COMMUNITY ANALYTICS', desc: 'Messages, voice hours, active members, game activity. All scannable at a glance.' },
+        { name: 'MEMBER INTELLIGENCE', desc: 'Individual insights, engagement patterns, value identification. Know who matters.' },
+        { name: 'DASHBOARD & DEEP DIVES', desc: 'Overview for quick decisions, dedicated pages for deeper exploration.' },
+        { name: 'SMART RAFFLES', desc: 'Behavioral giveaways that reward real participation. Higher multipliers for members who join voice, play games, or actively engage. Not random. Earned.' },
+      ],
+      differentiator: 'Consumer-grade UX in a B2B tool. Every interaction, every screen, every detail is designed from a user-first perspective, not a feature-first one. The difference is felt, not explained.',
+      craftNote: 'AI for research, inspiration, strategic direction. The product itself (brand, logo, design system, typography, grids, interfaces) is handcrafted from scratch.',
+    },
+    process: [
+      { phase: 'RESEARCH', desc: 'Competitor analysis, AI-assisted exploration. Gemini for research and brainstorming.' },
+      { phase: 'BRAND IDENTITY', desc: 'Name evolution through multiple iterations to "Kizuna." Logo, visual style, typography, design system.' },
+      { phase: 'DESIGN (FIGMA)', desc: 'Templates, grids, component systems. Dashboard layouts, user journeys, individual insight pages.' },
+      { phase: 'TEST & ITERATE', desc: 'Multiple test phases pre-launch. Community feedback loops. Feature prioritization from real usage.' },
+      { phase: 'LAUNCH & REFINE', desc: 'Core feature set shipped. Daily optimization based on feedback. Making it simpler every day.' },
+    ],
+    ahaQuote: '"Kizuna" (絆) means bonds in Japanese. The name captured exactly what the product is about: community and belonging through intelligence.',
+    impact: {
+      bullets: [
+        'Rapid growth post-launch',
+        '100+ communities onboarded',
+        'Continuous daily optimization cycle',
+        'Strong foundation of core features ready to scale',
+      ],
+      reflection: 'Start with a focused feature set, iterate from real feedback, resist feature bloat. The best product decisions came from watching how community managers actually used it, not from assumptions.',
+    },
+    tags: ['SOCIAL AI', 'DESIGN', 'UX/UI', 'PRODUCT'],
+    url: 'https://www.kizuna.gg',
+  },
+};
+
+// ─── CASE STUDY PAGE ─────────────────────────────────────────────────────────
+const CaseStudy = ({ study, t, onBack, onTagClick }) => {
+  const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
+
+  const SectionHeader = ({ num, title }) => (
+    <div style={{ display:'flex', alignItems:'center', gap:16, marginBottom:48, borderBottom:`1px solid ${t.border}`, paddingBottom:10 }}>
+      <span style={μ(t.accentFaint)}>{num}</span>
+      <span style={μ(t.text, { fontSize:12, letterSpacing:'0.35em' })}>{title}</span>
+    </div>
+  );
+
+  return (
+    <div className="animate-in" style={{ maxWidth:960, margin:'0 auto', padding:'160px 24px 160px' }}>
+
+      {/* ── PAGE HEADER ── */}
+      <div style={{ marginBottom:112, display:'flex', flexDirection:'column', gap:8 }}>
+        <button onClick={onBack} style={{ alignSelf:'flex-start', ...μ(t.textMuted, { letterSpacing:'0.3em' }), background:'none', border:'none', cursor:'crosshair', marginBottom:32, display:'flex', alignItems:'center', gap:8, transition:'color 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.color = t.accent}
+          onMouseLeave={e => e.currentTarget.style.color = t.textMuted}
+        >← RETURN</button>
+
+        {/* Headline: outline + filled */}
+        <h1 style={{ fontSize:'clamp(3.5rem,10vw,7.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:'transparent', WebkitTextStroke:t.stroke, lineHeight:0.85 }}>{study.headline.outline}</h1>
+        <h1 style={{ fontSize:'clamp(3.5rem,10vw,7.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:t.text, lineHeight:0.85 }}>{study.headline.filled}</h1>
+
+        {/* Subline */}
+        <p style={{ ...μ(t.textMuted, { fontSize:12, lineHeight:2 }), maxWidth:520, marginTop:32 }}>
+          {study.subline}
+        </p>
+
+        {/* Role + Timeline */}
+        <div style={{ display:'flex', gap:32, marginTop:24, flexWrap:'wrap' }}>
+          <span style={μ(t.accentLabel, { fontSize:10 })}>{study.role}</span>
+          <span style={μ(t.textFaint, { fontSize:10 })}>{study.timeline}</span>
+        </div>
+
+        {/* Tags */}
+        <div style={{ display:'flex', gap:6, marginTop:16 }}>
+          {study.tags.map(tag => (
+            <Tag key={tag} t={t} onClick={() => onTagClick?.(tag)}>{tag}</Tag>
+          ))}
+        </div>
+
+        {/* Metric cards */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:1, background:t.border, border:`1px solid ${t.border}`, marginTop:48 }}>
+          {study.metrics.map((m, i) => (
+            <div key={i} style={{ background:t.bg, padding:'32px 24px', display:'flex', flexDirection:'column', gap:8 }}>
+              <span style={{ fontFamily:'Big Shoulders Display, Impact, sans-serif', fontSize:'clamp(2rem,5vw,3rem)', fontWeight:900, color:t.text, lineHeight:1 }}>{m.value}</span>
+              <span style={μ(t.accentLabel, { fontSize:9 })}>{m.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── 01 CHALLENGE ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="01" title={`CHALLENGE // ${study.challenge.title}`} />
+        <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:64 }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
+            {study.challenge.paragraphs.map((p, i) => (
+              <p key={i} style={{ ...TYPE.body.md, color:t.textSecondary, lineHeight:1.8 }}>{p}</p>
+            ))}
+          </div>
+          <aside style={{ borderLeft:`1px solid ${t.border}`, paddingLeft:32, display:'flex', alignItems:'flex-start' }}>
+            <blockquote style={{ ...TYPE.body.intro, color:t.textMuted, fontStyle:'italic', lineHeight:1.8, margin:0 }}>
+              "{study.challenge.pullQuote}"
+            </blockquote>
+          </aside>
+        </div>
+      </section>
+
+      {/* ── 02 SOLUTION ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="02" title="SOLUTION // WHAT WE BUILT" />
+
+        {/* Feature grid */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}`, marginBottom:48 }}>
+          {study.solution.features.map((f, i) => (
+            <div key={i} style={{ background:t.bg, padding:'32px 24px', display:'flex', flexDirection:'column', gap:12 }}>
+              <span style={μ(t.accentLabel, { fontSize:10 })}>{f.name}</span>
+              <p style={{ ...TYPE.body.sm, color:t.textMuted, lineHeight:1.7 }}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Differentiator */}
+        <div style={{ borderLeft:`2px solid ${t.accent}`, paddingLeft:24, marginBottom:32 }}>
+          <p style={{ ...TYPE.body.md, color:t.textSecondary, lineHeight:1.8 }}>{study.solution.differentiator}</p>
+        </div>
+
+        {/* Craft note */}
+        <div style={{ padding:'24px', border:`1px solid ${t.border}`, background:t.bgSurface }}>
+          <span style={μ(t.accentFaint, { fontSize:9, marginBottom:8, display:'block' })}>AI VS. CRAFT</span>
+          <p style={{ ...TYPE.body.sm, color:t.textMuted, lineHeight:1.7 }}>{study.solution.craftNote}</p>
+        </div>
+      </section>
+
+      {/* ── 03 PROCESS ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="03" title="PROCESS // HOW WE GOT HERE" />
+
+        {/* Vertical timeline */}
+        <div style={{ display:'flex', flexDirection:'column', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
+          {study.process.map((step, i) => (
+            <div key={i} style={{ background:t.bg, padding:'28px 24px', display:'flex', alignItems:'flex-start', gap:24, borderLeft:`2px solid transparent`, transition:'border-color 0.2s, background 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.borderLeftColor = t.accent; e.currentTarget.style.background = t.bgHover; }}
+              onMouseLeave={e => { e.currentTarget.style.borderLeftColor = 'transparent'; e.currentTarget.style.background = t.bg; }}
+            >
+              <span style={μ(t.accentFaint, { fontSize:10, flexShrink:0, width:24 })}>{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <span style={μ(t.text, { fontSize:11, letterSpacing:'0.3em', display:'block', marginBottom:8 })}>{step.phase}</span>
+                <p style={{ ...TYPE.body.sm, color:t.textMuted, lineHeight:1.7 }}>{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Aha moment */}
+        {study.ahaQuote && (
+          <div style={{ marginTop:48, borderLeft:`2px solid ${t.accent}`, paddingLeft:24 }}>
+            <span style={μ(t.accentFaint, { fontSize:9, display:'block', marginBottom:8 })}>AHA MOMENT</span>
+            <p style={{ ...TYPE.body.md, color:t.textSecondary, fontStyle:'italic', lineHeight:1.8 }}>{study.ahaQuote}</p>
+          </div>
+        )}
+      </section>
+
+      {/* ── 04 IMPACT ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="04" title="IMPACT // WHAT HAPPENED" />
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64 }}>
+          {/* Bullets */}
+          <div style={{ display:'flex', flexDirection:'column', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
+            {study.impact.bullets.map((b, i) => (
+              <div key={i} style={{ background:t.bg, padding:'20px 24px', display:'flex', alignItems:'center', gap:16 }}>
+                <span style={μ(t.accentFaint, { fontSize:10 })}>{String(i + 1).padStart(2, '0')}</span>
+                <span style={{ ...TYPE.body.sm, color:t.textSecondary }}>{b}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Reflection */}
+          <div style={{ display:'flex', flexDirection:'column', justifyContent:'center' }}>
+            <span style={μ(t.accentFaint, { fontSize:9, marginBottom:12 })}>REFLECTION</span>
+            <p style={{ ...TYPE.body.md, color:t.textMuted, lineHeight:1.8 }}>{study.impact.reflection}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 05 VISUALS ── */}
+      <section style={{ marginBottom:128 }}>
+        <SectionHeader num="05" title="VISUALS // THE CRAFT" />
+
+        {/* Placeholder slots for screenshots/assets */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.border, border:`1px solid ${t.border}` }}>
+          {['Dashboard Overview', 'Member Intelligence', 'Brand Identity', 'Design System'].map((label, i) => (
+            <div key={i} style={{ background:t.bg, aspectRatio:'16/10', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:12 }}>
+              <span style={μ(t.textFaint, { fontSize:10 })}>{String(i + 1).padStart(2, '0')}</span>
+              <span style={μ(t.accentFaint, { fontSize:9 })}>{label.toUpperCase()}</span>
+              <span style={{ ...TYPE.body.xs, color:t.textFaint }}>Asset placeholder</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── FOOTER NAV ── */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:`1px solid ${t.border}`, paddingTop:32 }}>
+        <button onClick={onBack} style={{ ...μ(t.textMuted, { letterSpacing:'0.3em' }), background:'none', border:'none', cursor:'crosshair', transition:'color 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.color = t.accent}
+          onMouseLeave={e => e.currentTarget.style.color = t.textMuted}
+        >← ALL PROJECTS</button>
+        <a href={study.url} target="_blank" rel="noopener noreferrer" style={{ ...μ(t.accent, { letterSpacing:'0.3em' }), textDecoration:'none', display:'flex', alignItems:'center', gap:8, transition:'color 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.color = t.accentSecondary}
+          onMouseLeave={e => e.currentTarget.style.color = t.accent}
+        >VISIT KIZUNA <ArrowUpRight size={12} /></a>
+      </div>
+    </div>
+  );
+};
+
 // ─── DESIGN SYSTEM PAGE ──────────────────────────────────────────────────────
 const DesignSystem = ({ t, onBack }) => {
   const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
@@ -1387,7 +1622,7 @@ const LAB_FEATURED = [
   {
     title: 'KIZUNA',
     desc: 'Community intelligence platform. Discord-native signal processing and activation.',
-    url: 'https://www.kizuna.gg',
+    url: '#kizuna',
     tags: ['SOCIAL AI', 'DESIGN'],
     active: true,
     canvas: 'network',
@@ -1408,11 +1643,21 @@ const LAB_INDEX = [
 ];
 
 // ─── LAB CARD (featured, with hover-activated canvas) ────────────────────────
-const LabCard = ({ project, theme, t, onTagClick }) => {
+const LabCard = ({ project, theme, t, onTagClick, onNavigate }) => {
   const [hovered, setHovered] = useState(false);
+  const isInternal = project.url.startsWith('#');
+  const handleClick = isInternal ? (e) => {
+    e.preventDefault();
+    const slug = project.url.slice(1);
+    onNavigate?.(slug);
+    window.scrollTo({ top:0 });
+  } : undefined;
   return (
     <article>
-      <a className="lab-card__link" href={project.url} target="_blank" rel="noopener noreferrer"
+      <a className="lab-card__link" href={project.url}
+        target={isInternal ? undefined : '_blank'}
+        rel={isInternal ? undefined : 'noopener noreferrer'}
+        onClick={handleClick}
         style={{ background: hovered ? t.bgHover : t.bg }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -1602,6 +1847,8 @@ export default function App() {
       {/* ── MAIN ─────────────────────────────────────────────────────────── */}
       {page === 'design' ? (
         <DesignSystem t={t} onBack={() => setPage('home')} />
+      ) : CASE_STUDIES[page] ? (
+        <CaseStudy study={CASE_STUDIES[page]} t={t} onBack={() => { setPage('home'); window.scrollTo({ top:0 }); }} onTagClick={openGlossary} />
       ) : (<>
 
         {/* HERO — full width */}
@@ -1640,7 +1887,7 @@ export default function App() {
           {/* Featured — 2-column canvas cards */}
           <div role="list" className="lab__grid">
             {LAB_FEATURED.map(project => (
-              <LabCard key={project.title} project={project} theme={theme} t={t} onTagClick={openGlossary} />
+              <LabCard key={project.title} project={project} theme={theme} t={t} onTagClick={openGlossary} onNavigate={setPage} />
             ))}
           </div>
 
