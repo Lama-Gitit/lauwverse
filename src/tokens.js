@@ -1,3 +1,36 @@
+/**
+ * @typedef {Object} Theme
+ * All values are CSS color strings (hex, rgba) or CSS property strings.
+ * @property {string} bg             - Page background
+ * @property {string} bgSurface      - Elevated surface background (cards, panels)
+ * @property {string} bgHover        - Subtle hover fill for interactive rows
+ * @property {string} text           - Primary text
+ * @property {string} textSecondary  - Secondary / supporting text
+ * @property {string} textMuted      - De-emphasised text (captions, timestamps)
+ * @property {string} textFaint      - Barely-visible placeholder text
+ * @property {string} accent         - Brand accent (links, highlights)
+ * @property {string} accentSecondary - Hover-state accent
+ * @property {string} accentLabel    - Accent used on chip / tag labels
+ * @property {string} accentFaint    - Subdued accent for ambient fills
+ * @property {string} border         - Default 1px divider color
+ * @property {string} borderStrong   - Emphasis divider color
+ * @property {string} scanline       - CRT scanline overlay tint
+ * @property {string} dotColor       - Dot-grid pattern dot color
+ * @property {string} dotVignette    - Radial vignette color for dot grid
+ * @property {string} dotBloom       - Center glow for dot grid
+ * @property {string} navBg          - Navigation bar background (with alpha)
+ * @property {string} glitchA        - Glitch effect layer A color
+ * @property {string} glitchB        - Glitch effect layer B color
+ * @property {string} glitchGlow     - Glitch glow bloom color
+ * @property {string} stroke         - CSS border shorthand for outline/stroke text
+ * @property {string} selection      - ::selection background color
+ * @property {string} scrollThumb    - Scrollbar thumb color
+ * @property {string} scrollHover    - Scrollbar thumb hover color
+ * @property {string} pulseColor     - Pulsing status dot color
+ * @property {string} pulseShadow    - Box-shadow color for pulse animation
+ * @property {string} toggleLabel    - Theme-toggle button label text
+ */
+
 // ─── COLOR PALETTE (Material Design–style 50→950) ──────────────────────────────
 // Three monotonic scales. Every step is strictly darker than the one before.
 // WCAG rule: steps 50–400 use dark text (neutral.950), steps 500–950 use light text (neutral.50).
@@ -29,7 +62,11 @@ export const PALETTE = {
   },
 };
 
-// WCAG contrast-text helper — returns dark or light text color for any swatch
+/**
+ * WCAG contrast-text helper.
+ * @param {string} hex - 6-digit hex color, e.g. "#3E3284"
+ * @returns {string} Dark (jaguar[950]) or light (jaguar[50]) text color for AA contrast
+ */
 export const contrastText = (hex) => {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -38,7 +75,12 @@ export const contrastText = (hex) => {
   return L > 0.18 ? PALETTE.jaguar[950] : PALETTE.jaguar[50];
 };
 
-// rgba helper — transparent variants from palette hex values
+/**
+ * rgba helper — transparent variants from palette hex values.
+ * @param {string} hex   - 6-digit hex color, e.g. "#8C99F0"
+ * @param {number} a     - Alpha 0–1
+ * @returns {string} CSS rgba() string
+ */
 export const alpha = (hex, a) => {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -92,6 +134,7 @@ export const TYPE = {
 };
 
 // ─── THEME TOKENS ────────────────────────────────────────────────────────────
+/** @type {{ midnight: Theme, primal: Theme }} */
 export const THEMES = {
   midnight: {
     bg:           PALETTE.jaguar[950],
@@ -157,6 +200,13 @@ export const THEMES = {
 
 // Convert camelCase theme keys to --kebab-case CSS custom properties
 const toKebab = (s) => s.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+
+/**
+ * Convert a Theme object into a flat map of CSS custom-property names → values,
+ * suitable for spreading onto an element's `style` attribute.
+ * @param {Theme} t
+ * @returns {Record<string, string>} e.g. { '--bg': '#03020e', '--accent': '#697DEB', ... }
+ */
 export const themeToVars = (t) => {
   const vars = {};
   for (const [key, val] of Object.entries(t)) {

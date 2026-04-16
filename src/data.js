@@ -1,4 +1,70 @@
+/**
+ * @typedef {Object} GlossaryEntry
+ * @property {string}  title   - Display name for the term
+ * @property {string}  tagline - One-line summary shown below the title
+ * @property {string}  body    - Full-paragraph definition
+ * @property {string} [url]    - Optional external link (tools only)
+ */
+
+/**
+ * @typedef {Object} Metric
+ * @property {string} value - Formatted stat, e.g. "100+"
+ * @property {string} label - ALLCAPS descriptor, e.g. "COMMUNITIES SERVED"
+ */
+
+/**
+ * @typedef {Object} ChallengeSection
+ * @property {string}   title      - Section heading
+ * @property {string[]} paragraphs - Body copy paragraphs
+ * @property {string}   pullQuote  - Blockquote / pull-quote text
+ */
+
+/**
+ * @typedef {Object} SolutionFeature
+ * @property {string} name - Feature name (ALLCAPS label)
+ * @property {string} desc - Feature description
+ */
+
+/**
+ * @typedef {Object} SolutionSection
+ * @property {SolutionFeature[]} features       - Feature grid items
+ * @property {string}            differentiator - Accent-bordered differentiator paragraph
+ * @property {string}            craftNote      - AI-vs-craft callout text
+ */
+
+/**
+ * @typedef {Object} ProcessStep
+ * @property {string} phase - Step name (ALLCAPS), e.g. "RESEARCH"
+ * @property {string} desc  - Step description
+ */
+
+/**
+ * @typedef {Object} ImpactSection
+ * @property {string[]} bullets    - Impact bullet points
+ * @property {string}   reflection - Closing reflection paragraph
+ */
+
+/**
+ * @typedef {Object} CaseStudy
+ * @property {string}          slug       - URL slug, e.g. "kizuna"
+ * @property {{ outline: string, filled: string }} headline - Two-span display headline
+ * @property {string}          subline    - Subtitle below headline
+ * @property {'noise'|'signal'|'grid'} heroBg - Hero background canvas variant
+ * @property {string}          oneLiner   - One-sentence project summary
+ * @property {string}          role       - Responsibilities string (dot-separated)
+ * @property {string}          timeline   - Timeline label, e.g. "Ongoing"
+ * @property {Metric[]}        metrics    - Hero metric cards
+ * @property {ChallengeSection} challenge
+ * @property {SolutionSection}  solution
+ * @property {ProcessStep[]}    process
+ * @property {string}           ahaQuote  - Process aha-moment italic pull quote
+ * @property {ImpactSection}    impact
+ * @property {string[]}         tags      - Tag keys used in glossary lookups
+ * @property {string}           url       - External project URL
+ */
+
 // ─── TAG GLOSSARY DATA ──────────────────────────────────────────────────────
+/** @type {Record<string, GlossaryEntry>} */
 export const TAG_GLOSSARY = {
   'CULTURE': {
     title: 'Culture',
@@ -161,13 +227,19 @@ export const TAG_GLOSSARY = {
   },
 };
 
-// Normalize tag key for glossary lookup
+/**
+ * Normalize a tag string to its canonical TAG_GLOSSARY key.
+ * Handles case-insensitive and aliased lookups (e.g. "vibe code" → "VIBE CODE").
+ * @param {string} tag - Raw tag text from UI or data
+ * @returns {string} Uppercase key present in TAG_GLOSSARY, or the uppercased input if not found
+ */
 export const glossaryKey = (tag) => {
   const upper = tag.toUpperCase();
   return TAG_GLOSSARY[upper] ? upper : Object.keys(TAG_GLOSSARY).find(k => k === upper) || upper;
 };
 
 // ─── CASE STUDY DATA ─────────────────────────────────────────────────────────
+/** @type {Record<string, CaseStudy>} */
 export const CASE_STUDIES = {
   kizuna: {
     slug: 'kizuna',
