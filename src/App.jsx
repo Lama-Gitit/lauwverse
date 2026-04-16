@@ -764,104 +764,139 @@ const CASE_STUDIES = {
 };
 
 // ─── CASE STUDY PAGE ─────────────────────────────────────────────────────────
-// variant: 'noise' | 'signal' | 'grid'
-const HeroBgCanvas = ({ t, variant = 'noise' }) => {
-  const ref = useRef(null);
+// variant: 'noise' (animated) | 'signal' (static) | 'grid' (static)
+const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
+  const ref  = useRef(null);
+  const rafRef = useRef(null);
+
   useEffect(() => {
     const c = ref.current;
     if (!c) return;
     const ctx = c.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
-    const w = c.offsetWidth, h = c.offsetHeight;
-    c.width = w * dpr; c.height = h * dpr;
-    ctx.scale(dpr, dpr);
 
-    const isDark = t.bg === PALETTE.jaguar[950];
-    const accent = PALETTE.downriver[300];
-    const base  = isDark ? PALETTE.jaguar[50] : PALETTE.jaguar[900];
+    const resize = () => {
+      c.width  = c.offsetWidth  * dpr;
+      c.height = c.offsetHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(c);
+
+    const isDark = theme.bg === PALETTE.jaguar[950];
+    const accentHex = PALETTE.downriver[300];
+    const baseHex   = isDark ? PALETTE.jaguar[50] : PALETTE.jaguar[900];
+    const toRgb = h => [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
+    const aRgb = toRgb(accentHex);
+    const bRgb = toRgb(baseHex);
 
     if (variant === 'noise') {
-      // Dissolving pixel grain — dense at top, fades to signal lines at bottom
-      for (let y = 0; y < h; y += 2) {
-        const fade    = Math.pow(1 - y / h, 1.6);
-        const density = fade * 0.55;
-        for (let x = 0; x < w; x += 2) {
+      // ── Pre-generate particle field (once) ──────────────────────────────────
+      // Each particle remembers its row-fade (density weight), whether it's an
+      // accent pixel, and unique phase+speed for the flicker sine wave.
+      const CELL = 4;
+      const W = c.offsetWidth, H = c.offsetHeight;
+      const particles = [];
+      for (let y = 0; y < H; y += CELL) {
+        const rowFade = Math.pow(1 - y / H, 1.6);
+        const density = rowFade * 0.55;
+        for (let x = 0; x < W; x += CELL) {
           if (Math.random() > density) continue;
-          const isAccent = Math.random() < 0.18;
-          const col = isAccent ? accent : base;
-          const r = parseInt(col.slice(1,3),16), g = parseInt(col.slice(3,5),16), b = parseInt(col.slice(5,7),16);
-          ctx.fillStyle = `rgba(${r},${g},${b},${fade * (0.18 + Math.random() * 0.22)})`;
-          ctx.fillRect(x, y, 2, 2);
+          particles.push({
+            x, y,
+            isAccent: Math.random() < 0.15,
+            speed: 0.35 + Math.random() * 2.8,   // individual flicker rate
+            phase: Math.random() * Math.PI * 2,   // random start in the cycle
+            weight: rowFade,
+          });
         }
       }
-      // Clean signal lines emerging at the bottom
-      for (let i = 0; i < 4; i++) {
-        const y = h * 0.78 + i * 10;
-        const a = 0.12 + i * 0.05;
-        const [r,g,b] = [parseInt(accent.slice(1,3),16), parseInt(accent.slice(3,5),16), parseInt(accent.slice(5,7),16)];
-        ctx.strokeStyle = `rgba(${r},${g},${b},${a})`;
-        ctx.lineWidth = i === 3 ? 1 : 0.5;
-        ctx.beginPath(); ctx.moveTo(w * 0.05, y); ctx.lineTo(w * 0.95, y); ctx.stroke();
-      }
-    }
 
-    else if (variant === 'signal') {
-      // EKG / waveform radiating horizontally from center
+      // ── RAF render loop ──────────────────────────────────────────────────────
+      const render = (now) => {
+        rafRef.current = requestAnimationFrame(render);
+        const T = now * 0.001;
+        const w = c.offsetWidth, h = c.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        for (const p of particles) {
+          // Each pixel flickers at its own frequency — same feel as treeline stars
+          const flicker = 0.5 + 0.5 * Math.sin(T * p.speed + p.phase);
+          const a = p.weight * flicker * (p.isAccent ? 0.45 : 0.22);
+          const rgb = p.isAccent ? aRgb : bRgb;
+          ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a.toFixed(3)})`;
+          ctx.fillRect(p.x, p.y, CELL, CELL);
+        }
+
+        // Pulsing signal lines that emerge at the bottom (noise → signal)
+        for (let i = 0; i < 4; i++) {
+          const lineY  = h * 0.82 + i * 10;
+          const pulse  = 0.5 + 0.5 * Math.sin(T * 1.1 + i * 0.75);
+          const lineA  = (0.08 + i * 0.05) * pulse;
+          ctx.strokeStyle = `rgba(${aRgb[0]},${aRgb[1]},${aRgb[2]},${lineA.toFixed(3)})`;
+          ctx.lineWidth = i === 3 ? 1 : 0.5;
+          ctx.beginPath(); ctx.moveTo(w * 0.05, lineY); ctx.lineTo(w * 0.95, lineY); ctx.stroke();
+        }
+      };
+      rafRef.current = requestAnimationFrame(render);
+
+    } else if (variant === 'signal') {
+      // Static EKG waveform
+      const w = c.offsetWidth, h = c.offsetHeight;
       const cx = w / 2, cy = h * 0.5;
       for (let line = 0; line < 5; line++) {
         const yOff = (line - 2) * 28;
         const amp  = 18 - Math.abs(line - 2) * 4;
         const a    = 0.18 - Math.abs(line - 2) * 0.03;
-        const [r,g,b] = [parseInt(accent.slice(1,3),16), parseInt(accent.slice(3,5),16), parseInt(accent.slice(5,7),16)];
-        ctx.strokeStyle = `rgba(${r},${g},${b},${a})`;
+        ctx.strokeStyle = `rgba(${aRgb[0]},${aRgb[1]},${aRgb[2]},${a})`;
         ctx.lineWidth = line === 2 ? 1.5 : 0.75;
         ctx.beginPath();
         for (let x = 0; x < w; x++) {
-          const dist = Math.abs(x - cx) / cx;
-          const fade = Math.max(0, 1 - dist * 1.2);
+          const dist  = Math.abs(x - cx) / cx;
+          const fade  = Math.max(0, 1 - dist * 1.2);
           const spike = (x > cx - 80 && x < cx + 80) ? Math.sin((x - cx + 80) / 160 * Math.PI * 4) * amp : 0;
-          const y = cy + yOff + spike * fade + Math.sin(x * 0.04) * 3 * fade;
+          const y     = cy + yOff + spike * fade + Math.sin(x * 0.04) * 3 * fade;
           x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         }
         ctx.stroke();
       }
-      // Faint scanline overlay
       for (let y = 0; y < h; y += 6) {
-        const [r,g,b] = [parseInt(base.slice(1,3),16), parseInt(base.slice(3,5),16), parseInt(base.slice(5,7),16)];
-        ctx.fillStyle = `rgba(${r},${g},${b},0.015)`;
+        ctx.fillStyle = `rgba(${bRgb[0]},${bRgb[1]},${bRgb[2]},0.015)`;
         ctx.fillRect(0, y, w, 1);
       }
-    }
 
-    else if (variant === 'grid') {
-      // Orthogonal dot grid — fades toward edges with accent highlights
+    } else if (variant === 'grid') {
+      // Static dot grid
+      const w = c.offsetWidth, h = c.offsetHeight;
       const gap = 28;
       for (let x = gap; x < w; x += gap) {
         for (let y = gap; y < h; y += gap) {
           const dx = (x / w - 0.5) * 2, dy = (y / h - 0.5) * 2;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const fade = Math.max(0, 1 - dist * 0.7);
-          const isAccent = Math.random() < 0.06;
-          const col = isAccent ? accent : base;
-          const [r,g,b] = [parseInt(col.slice(1,3),16), parseInt(col.slice(3,5),16), parseInt(col.slice(5,7),16)];
-          ctx.fillStyle = `rgba(${r},${g},${b},${fade * (isAccent ? 0.45 : 0.14)})`;
-          ctx.beginPath(); ctx.arc(x, y, isAccent ? 1.5 : 1, 0, Math.PI * 2); ctx.fill();
+          const fade = Math.max(0, 1 - Math.sqrt(dx*dx+dy*dy) * 0.7);
+          const isAcc = Math.random() < 0.06;
+          const rgb = isAcc ? aRgb : bRgb;
+          ctx.fillStyle = `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${fade * (isAcc ? 0.45 : 0.14)})`;
+          ctx.beginPath(); ctx.arc(x, y, isAcc ? 1.5 : 1, 0, Math.PI * 2); ctx.fill();
         }
       }
-      // Connecting lines on highlighted dots
       ctx.lineWidth = 0.4;
-      const [r,g,b] = [parseInt(accent.slice(1,3),16), parseInt(accent.slice(3,5),16), parseInt(accent.slice(5,7),16)];
       for (let x = gap; x < w - gap; x += gap * 3) {
         for (let y = gap; y < h - gap; y += gap * 3) {
           const dx = (x / w - 0.5) * 2, dy = (y / h - 0.5) * 2;
           const fade = Math.max(0, 1 - Math.sqrt(dx*dx+dy*dy) * 0.8);
-          ctx.strokeStyle = `rgba(${r},${g},${b},${fade * 0.12})`;
+          ctx.strokeStyle = `rgba(${aRgb[0]},${aRgb[1]},${aRgb[2]},${fade * 0.12})`;
           ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + gap, y); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + gap); ctx.stroke();
         }
       }
     }
-  }, [t, variant]);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      ro.disconnect();
+    };
+  }, [theme, variant]);
 
   return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }} />;
 };
