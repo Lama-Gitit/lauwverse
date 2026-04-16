@@ -341,6 +341,32 @@ const TAG_GLOSSARY = {
     body: 'Lovable is what I reach for when I want to productize or prototype an idea fast without the usual setup tax. I use it less now that Claude handles more of that work, but it still earns its place when I want something running in minutes, not hours.',
     url: 'https://lovable.dev',
   },
+  // ── Role / Responsibility terms ──────────────────────────────────────────────
+  'CO-OWNER': {
+    title: 'Co-owner',
+    tagline: 'Shared stake. Shared accountability.',
+    body: 'Being a co-owner means having skin in the game beyond the deliverable. Not just executing a brief, but making decisions about direction, prioritization, and what we stand for. The creative and strategic choices I make carry real consequences, which is the only way I know how to make good ones.',
+  },
+  'PRODUCT DESIGNER': {
+    title: 'Product Designer',
+    tagline: 'The bridge between intent and interface.',
+    body: 'A product designer is not just someone who makes screens look good. It is the role that holds the connection between user behavior, business intent, and technical reality. I design the full experience: how something works, how it feels, how it guides without explaining itself. The goal is always a product that is obvious to the right person and invisible to everyone else.',
+  },
+  'BRAND & VISUAL IDENTITY': {
+    title: 'Brand & Visual Identity',
+    tagline: 'The system that makes everything feel like one thing.',
+    body: 'Brand identity is not a deliverable. It is a decision architecture that makes every touchpoint feel like it came from the same source. I build identity systems from the inside out: starting with what a product needs to communicate, then building the visual language that makes it impossible to mistake for anything else. Logo, color, type, motion, and tone all answer the same underlying question.',
+  },
+  'UX/UI': {
+    title: 'UX/UI',
+    tagline: 'Where experience meets the surface.',
+    body: 'UX is understanding the journey. UI is building the moment. Together they are the discipline of making digital products that humans can actually use without thinking too hard. I approach both as one continuous responsibility: the flow shapes the frame, and the frame shapes the feeling. You cannot separate them and expect the result to feel coherent.',
+  },
+  'STRATEGY': {
+    title: 'Strategy',
+    tagline: 'The decisions that make all other decisions easier.',
+    body: 'Strategy is the work that happens before the work. It is the thinking that decides which problems are worth solving, which position to defend, and which moves compound over time. I bring a strategic lens to design and product because aesthetics without direction is just decoration. The best outcomes come from knowing why before deciding what.',
+  },
 };
 
 // Normalize tag key for glossary lookup
@@ -687,6 +713,7 @@ const CASE_STUDIES = {
     slug: 'kizuna',
     headline: { outline: 'FROM NOISE', filled: 'TO SIGNAL.' },
     subline: 'Kizuna Intelligence for brands that want to listen.',
+    heroBg: 'noise',   // options: 'noise' | 'signal' | 'grid'
     oneLiner: 'Community intelligence platform that turns Discord noise into actionable insights.',
     role: 'Co-owner · Product Designer · Brand & Visual Identity · UX/UI · Strategy',
     timeline: 'Ongoing',
@@ -737,7 +764,8 @@ const CASE_STUDIES = {
 };
 
 // ─── CASE STUDY PAGE ─────────────────────────────────────────────────────────
-const NoiseCanvas = ({ t }) => {
+// variant: 'noise' | 'signal' | 'grid'
+const HeroBgCanvas = ({ t, variant = 'noise' }) => {
   const ref = useRef(null);
   useEffect(() => {
     const c = ref.current;
@@ -748,38 +776,92 @@ const NoiseCanvas = ({ t }) => {
     c.width = w * dpr; c.height = h * dpr;
     ctx.scale(dpr, dpr);
 
-    // Draw noise that dissolves downward (noise → signal)
     const isDark = t.bg === PALETTE.jaguar[950];
-    const baseR = isDark ? 3 : 240, baseG = isDark ? 2 : 240, baseB = isDark ? 14 : 249;
-    const accentR = isDark ? 105 : 33, accentG = isDark ? 125 : 77, accentB = isDark ? 235 : 195;
+    const accent = PALETTE.downriver[300];
+    const base  = isDark ? PALETTE.jaguar[50] : PALETTE.jaguar[900];
 
-    for (let y = 0; y < h; y += 2) {
-      const fade = 1 - (y / h); // 1 at top, 0 at bottom
-      const density = fade * fade; // quadratic falloff
-      for (let x = 0; x < w; x += 2) {
-        if (Math.random() > density * 0.35) continue;
-        const isAccent = Math.random() < 0.15;
-        const r = isAccent ? accentR : baseR;
-        const g = isAccent ? accentG : baseG;
-        const b = isAccent ? accentB : baseB;
-        const a = density * (0.08 + Math.random() * 0.12);
-        ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-        ctx.fillRect(x, y, 2, 2);
+    if (variant === 'noise') {
+      // Dissolving pixel grain — dense at top, fades to signal lines at bottom
+      for (let y = 0; y < h; y += 2) {
+        const fade    = Math.pow(1 - y / h, 1.6);
+        const density = fade * 0.55;
+        for (let x = 0; x < w; x += 2) {
+          if (Math.random() > density) continue;
+          const isAccent = Math.random() < 0.18;
+          const col = isAccent ? accent : base;
+          const r = parseInt(col.slice(1,3),16), g = parseInt(col.slice(3,5),16), b = parseInt(col.slice(5,7),16);
+          ctx.fillStyle = `rgba(${r},${g},${b},${fade * (0.18 + Math.random() * 0.22)})`;
+          ctx.fillRect(x, y, 2, 2);
+        }
+      }
+      // Clean signal lines emerging at the bottom
+      for (let i = 0; i < 4; i++) {
+        const y = h * 0.78 + i * 10;
+        const a = 0.12 + i * 0.05;
+        const [r,g,b] = [parseInt(accent.slice(1,3),16), parseInt(accent.slice(3,5),16), parseInt(accent.slice(5,7),16)];
+        ctx.strokeStyle = `rgba(${r},${g},${b},${a})`;
+        ctx.lineWidth = i === 3 ? 1 : 0.5;
+        ctx.beginPath(); ctx.moveTo(w * 0.05, y); ctx.lineTo(w * 0.95, y); ctx.stroke();
       }
     }
 
-    // Horizontal signal lines near bottom
-    const lineY = h * 0.85;
-    for (let i = 0; i < 3; i++) {
-      const y = lineY + i * 12;
-      ctx.strokeStyle = isDark ? alpha(PALETTE.downriver[300], 0.08 + i * 0.03) : alpha(PALETTE.downriver[400], 0.06 + i * 0.02);
-      ctx.lineWidth = 0.5;
-      ctx.beginPath();
-      ctx.moveTo(w * 0.1, y);
-      ctx.lineTo(w * 0.9, y);
-      ctx.stroke();
+    else if (variant === 'signal') {
+      // EKG / waveform radiating horizontally from center
+      const cx = w / 2, cy = h * 0.5;
+      for (let line = 0; line < 5; line++) {
+        const yOff = (line - 2) * 28;
+        const amp  = 18 - Math.abs(line - 2) * 4;
+        const a    = 0.18 - Math.abs(line - 2) * 0.03;
+        const [r,g,b] = [parseInt(accent.slice(1,3),16), parseInt(accent.slice(3,5),16), parseInt(accent.slice(5,7),16)];
+        ctx.strokeStyle = `rgba(${r},${g},${b},${a})`;
+        ctx.lineWidth = line === 2 ? 1.5 : 0.75;
+        ctx.beginPath();
+        for (let x = 0; x < w; x++) {
+          const dist = Math.abs(x - cx) / cx;
+          const fade = Math.max(0, 1 - dist * 1.2);
+          const spike = (x > cx - 80 && x < cx + 80) ? Math.sin((x - cx + 80) / 160 * Math.PI * 4) * amp : 0;
+          const y = cy + yOff + spike * fade + Math.sin(x * 0.04) * 3 * fade;
+          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      // Faint scanline overlay
+      for (let y = 0; y < h; y += 6) {
+        const [r,g,b] = [parseInt(base.slice(1,3),16), parseInt(base.slice(3,5),16), parseInt(base.slice(5,7),16)];
+        ctx.fillStyle = `rgba(${r},${g},${b},0.015)`;
+        ctx.fillRect(0, y, w, 1);
+      }
     }
-  }, [t]);
+
+    else if (variant === 'grid') {
+      // Orthogonal dot grid — fades toward edges with accent highlights
+      const gap = 28;
+      for (let x = gap; x < w; x += gap) {
+        for (let y = gap; y < h; y += gap) {
+          const dx = (x / w - 0.5) * 2, dy = (y / h - 0.5) * 2;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const fade = Math.max(0, 1 - dist * 0.7);
+          const isAccent = Math.random() < 0.06;
+          const col = isAccent ? accent : base;
+          const [r,g,b] = [parseInt(col.slice(1,3),16), parseInt(col.slice(3,5),16), parseInt(col.slice(5,7),16)];
+          ctx.fillStyle = `rgba(${r},${g},${b},${fade * (isAccent ? 0.45 : 0.14)})`;
+          ctx.beginPath(); ctx.arc(x, y, isAccent ? 1.5 : 1, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+      // Connecting lines on highlighted dots
+      ctx.lineWidth = 0.4;
+      const [r,g,b] = [parseInt(accent.slice(1,3),16), parseInt(accent.slice(3,5),16), parseInt(accent.slice(5,7),16)];
+      for (let x = gap; x < w - gap; x += gap * 3) {
+        for (let y = gap; y < h - gap; y += gap * 3) {
+          const dx = (x / w - 0.5) * 2, dy = (y / h - 0.5) * 2;
+          const fade = Math.max(0, 1 - Math.sqrt(dx*dx+dy*dy) * 0.8);
+          ctx.strokeStyle = `rgba(${r},${g},${b},${fade * 0.12})`;
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + gap, y); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + gap); ctx.stroke();
+        }
+      }
+    }
+  }, [t, variant]);
 
   return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }} />;
 };
@@ -797,9 +879,9 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
   return (
     <div className="animate-in">
 
-      {/* ── HERO HEADER with noise-to-signal background ── */}
+      {/* ── HERO HEADER with generative background ── */}
       <div style={{ position:'relative', overflow:'hidden', borderBottom:`1px solid ${t.border}` }}>
-        <NoiseCanvas t={t} />
+        <HeroBgCanvas t={t} variant={study.heroBg || 'noise'} />
         <div style={{ position:'relative', zIndex:1, maxWidth:960, margin:'0 auto', padding:'120px 24px 64px' }}>
 
           <button onClick={onBack} style={{ alignSelf:'flex-start', ...μ(t.textMuted, { letterSpacing:'0.3em' }), background:'none', border:'none', cursor:'crosshair', marginBottom:40, display:'flex', alignItems:'center', gap:8, transition:'color 0.2s' }}
@@ -811,38 +893,55 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
           <h1 style={{ fontSize:'clamp(2.8rem,8vw,5.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:'transparent', WebkitTextStroke:t.stroke, lineHeight:0.85 }}>{study.headline.outline}</h1>
           <h1 style={{ fontSize:'clamp(2.8rem,8vw,5.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:t.text, lineHeight:0.85 }}>{study.headline.filled}</h1>
 
-          {/* Subline: variant label + continuation */}
-          <p style={{ marginTop:32, lineHeight:1.8 }}>
-            <span style={{ ...TYPE.mono.sm, fontSize:13, letterSpacing:'0.35em', color:t.text }}>{study.subline.split(' for ')[0].toUpperCase()}</span>
-            <span style={{ ...TYPE.mono.sm, fontSize:12, letterSpacing:'0.3em', color:t.textSecondary, marginLeft:8 }}>FOR {study.subline.split(' for ')[1]?.toUpperCase()}</span>
-          </p>
+          {/* Subline + Visit CTA */}
+          <div style={{ marginTop:32, display:'flex', alignItems:'baseline', justifyContent:'space-between', gap:32, flexWrap:'wrap' }}>
+            <p>
+              <span style={{ ...TYPE.mono.sm, fontSize:13, letterSpacing:'0.35em', color:t.text }}>{study.subline.split(' for ')[0].toUpperCase()}</span>
+              <span style={{ ...TYPE.mono.sm, fontSize:12, letterSpacing:'0.3em', color:t.textSecondary, marginLeft:8 }}>FOR {study.subline.split(' for ')[1]?.toUpperCase()}</span>
+            </p>
+            <a href={study.url} target="_blank" rel="noopener noreferrer"
+              style={{ ...μ(t.accent, { letterSpacing:'0.3em', fontSize:10 }), textDecoration:'none', display:'flex', alignItems:'center', gap:8, flexShrink:0, transition:'color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.color = t.accentSecondary}
+              onMouseLeave={e => e.currentTarget.style.color = t.accent}
+            >VISIT KIZUNA <ArrowUpRight size={10} /></a>
+          </div>
 
-          {/* ── Responsibilities + Meta row ── */}
+          {/* ── Responsibilities + Meta row ──
+              Panel uses jaguar[700] (#3E3284) — visibly elevated from page bg.
+              CSS vars overridden on container: --tag-color & --border boosted
+              for WCAG AA on the purple surface (jaguar[100] = ~7.5:1 contrast).  */}
           {(() => {
-            const panelBg   = PALETTE.jaguar[700];   // visibly elevated purple
-            const chipBg    = PALETTE.jaguar[800];   // recessed chip bg
-            const labelCol  = PALETTE.jaguar[300];   // readable label
+            const panelBg  = PALETTE.jaguar[700];
+            const panelCss = {
+              '--tag-color': PALETTE.jaguar[100],                  // AAA contrast on jaguar[700]
+              '--border':    alpha(PALETTE.jaguar[100], 0.22),      // visible chip border
+              '--accent':    PALETTE.downriver[200],                // hover accent on panel
+              '--accent-secondary': PALETTE.downriver[100],
+            };
+            const labelCol = PALETTE.jaguar[300];
             return (
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.borderStrong, border:`1px solid ${t.borderStrong}`, marginTop:32 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:alpha(PALETTE.jaguar[100], 0.3), border:`1px solid ${alpha(PALETTE.jaguar[100], 0.15)}`, marginTop:32 }}>
 
-                {/* Left: Responsibilities */}
-                <div style={{ background:panelBg, padding:'16px 20px', display:'flex', flexDirection:'column', gap:10 }}>
+                {/* Left: Responsibilities — each chip opens glossary */}
+                <div style={{ ...panelCss, background:panelBg, padding:'16px 20px', display:'flex', flexDirection:'column', gap:10 }}>
                   <span style={μ(labelCol, { fontSize:8 })}>RESPONSIBILITIES</span>
                   <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
                     {study.role.split(' · ').map((role, i) => (
-                      <span key={i} style={μ(PALETTE.jaguar[50], { fontSize:9, padding:'4px 10px', background:chipBg, border:`1px solid ${alpha(PALETTE.jaguar[50], 0.12)}` })}>{role.toUpperCase()}</span>
+                      <Tag key={i} t={{ ...t, accentLabel: PALETTE.jaguar[100] }} size="sm"
+                        onClick={() => onTagClick?.(role)}>{role}</Tag>
                     ))}
                   </div>
                 </div>
 
-                {/* Right: Tags + Year (left-aligned) */}
-                <div style={{ background:panelBg, padding:'16px 20px', display:'flex', flexDirection:'column', gap:10 }}>
+                {/* Right: Tags + Year — left-aligned, all open glossary */}
+                <div style={{ ...panelCss, background:panelBg, padding:'16px 20px', display:'flex', flexDirection:'column', gap:10 }}>
                   <span style={μ(labelCol, { fontSize:8 })}>TAGS</span>
                   <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
                     {study.tags.map(tag => (
-                      <Tag key={tag} t={t} onClick={() => onTagClick?.(tag)}>{tag}</Tag>
+                      <Tag key={tag} t={{ ...t, accentLabel: PALETTE.jaguar[100] }} size="sm"
+                        onClick={() => onTagClick?.(tag)}>{tag}</Tag>
                     ))}
-                    <Tag t={t}>2026</Tag>
+                    <Tag t={{ ...t, accentLabel: PALETTE.jaguar[100] }} size="sm">2026</Tag>
                   </div>
                 </div>
 
