@@ -737,6 +737,53 @@ const CASE_STUDIES = {
 };
 
 // ─── CASE STUDY PAGE ─────────────────────────────────────────────────────────
+const NoiseCanvas = ({ t }) => {
+  const ref = useRef(null);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const w = c.offsetWidth, h = c.offsetHeight;
+    c.width = w * dpr; c.height = h * dpr;
+    ctx.scale(dpr, dpr);
+
+    // Draw noise that dissolves downward (noise → signal)
+    const isDark = t.bg === PALETTE.jaguar[950];
+    const baseR = isDark ? 3 : 240, baseG = isDark ? 2 : 240, baseB = isDark ? 14 : 249;
+    const accentR = isDark ? 105 : 33, accentG = isDark ? 125 : 77, accentB = isDark ? 235 : 195;
+
+    for (let y = 0; y < h; y += 2) {
+      const fade = 1 - (y / h); // 1 at top, 0 at bottom
+      const density = fade * fade; // quadratic falloff
+      for (let x = 0; x < w; x += 2) {
+        if (Math.random() > density * 0.35) continue;
+        const isAccent = Math.random() < 0.15;
+        const r = isAccent ? accentR : baseR;
+        const g = isAccent ? accentG : baseG;
+        const b = isAccent ? accentB : baseB;
+        const a = density * (0.08 + Math.random() * 0.12);
+        ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+
+    // Horizontal signal lines near bottom
+    const lineY = h * 0.85;
+    for (let i = 0; i < 3; i++) {
+      const y = lineY + i * 12;
+      ctx.strokeStyle = isDark ? alpha(PALETTE.downriver[300], 0.08 + i * 0.03) : alpha(PALETTE.downriver[400], 0.06 + i * 0.02);
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(w * 0.1, y);
+      ctx.lineTo(w * 0.9, y);
+      ctx.stroke();
+    }
+  }, [t]);
+
+  return <canvas ref={ref} style={{ position:'absolute', inset:0, width:'100%', height:'100%', pointerEvents:'none' }} />;
+};
+
 const CaseStudy = ({ study, t, onBack, onTagClick }) => {
   const μ = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.4em', color, ...extra });
 
@@ -748,58 +795,76 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
   );
 
   return (
-    <div className="animate-in" style={{ maxWidth:960, margin:'0 auto', padding:'160px 24px 160px' }}>
+    <div className="animate-in">
 
-      {/* ── PAGE HEADER ── */}
-      <div style={{ marginBottom:112, display:'flex', flexDirection:'column', gap:8 }}>
-        <button onClick={onBack} style={{ alignSelf:'flex-start', ...μ(t.textMuted, { letterSpacing:'0.3em' }), background:'none', border:'none', cursor:'crosshair', marginBottom:32, display:'flex', alignItems:'center', gap:8, transition:'color 0.2s' }}
-          onMouseEnter={e => e.currentTarget.style.color = t.accent}
-          onMouseLeave={e => e.currentTarget.style.color = t.textMuted}
-        >← RETURN</button>
+      {/* ── HERO HEADER with noise-to-signal background ── */}
+      <div style={{ position:'relative', overflow:'hidden', borderBottom:`1px solid ${t.border}` }}>
+        <NoiseCanvas t={t} />
+        <div style={{ position:'relative', zIndex:1, maxWidth:960, margin:'0 auto', padding:'120px 24px 64px' }}>
 
-        {/* Headline: outline + filled */}
-        <h1 style={{ fontSize:'clamp(3.5rem,10vw,7.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:'transparent', WebkitTextStroke:t.stroke, lineHeight:0.85 }}>{study.headline.outline}</h1>
-        <h1 style={{ fontSize:'clamp(3.5rem,10vw,7.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:t.text, lineHeight:0.85 }}>{study.headline.filled}</h1>
+          <button onClick={onBack} style={{ alignSelf:'flex-start', ...μ(t.textMuted, { letterSpacing:'0.3em' }), background:'none', border:'none', cursor:'crosshair', marginBottom:40, display:'flex', alignItems:'center', gap:8, transition:'color 0.2s' }}
+            onMouseEnter={e => e.currentTarget.style.color = t.accent}
+            onMouseLeave={e => e.currentTarget.style.color = t.textMuted}
+          >← RETURN</button>
 
-        {/* Subline */}
-        <p style={{ ...μ(t.textSecondary, { fontSize:12, lineHeight:2 }), maxWidth:520, marginTop:32 }}>
-          {study.subline}
-        </p>
+          {/* Headline: outline + filled */}
+          <h1 style={{ fontSize:'clamp(2.8rem,8vw,5.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:'transparent', WebkitTextStroke:t.stroke, lineHeight:0.85 }}>{study.headline.outline}</h1>
+          <h1 style={{ fontSize:'clamp(2.8rem,8vw,5.5rem)', fontWeight:900, fontStyle:'italic', textTransform:'uppercase', letterSpacing:'-0.07em', color:t.text, lineHeight:0.85 }}>{study.headline.filled}</h1>
 
-        {/* Role + Timeline cluster */}
-        <div style={{ display:'flex', gap:1, marginTop:24, background:t.border, border:`1px solid ${t.border}`, width:'fit-content' }}>
-          {study.role.split(' · ').map((role, i) => (
-            <div key={i} style={{ background:t.bg, padding:'8px 16px' }}>
-              <span style={μ(t.accentLabel, { fontSize:9 })}>{role.toUpperCase()}</span>
-            </div>
-          ))}
-          <div style={{ background:t.bgSurface, padding:'8px 16px' }}>
-            <span style={μ(t.textFaint, { fontSize:9 })}>{study.timeline.toUpperCase()}</span>
+          {/* Subline: variant label + continuation */}
+          <p style={{ marginTop:32, lineHeight:1.8 }}>
+            <span style={{ ...TYPE.mono.sm, fontSize:13, letterSpacing:'0.35em', color:t.text }}>{study.subline.split(' for ')[0].toUpperCase()}</span>
+            <span style={{ ...TYPE.mono.sm, fontSize:12, letterSpacing:'0.3em', color:t.textSecondary, marginLeft:8 }}>FOR {study.subline.split(' for ')[1]?.toUpperCase()}</span>
+          </p>
+
+          {/* ── Responsibilities + Meta row ── */}
+          {(() => {
+            const panelBg   = PALETTE.jaguar[700];   // visibly elevated purple
+            const chipBg    = PALETTE.jaguar[800];   // recessed chip bg
+            const labelCol  = PALETTE.jaguar[300];   // readable label
+            return (
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:1, background:t.borderStrong, border:`1px solid ${t.borderStrong}`, marginTop:32 }}>
+
+                {/* Left: Responsibilities */}
+                <div style={{ background:panelBg, padding:'16px 20px', display:'flex', flexDirection:'column', gap:10 }}>
+                  <span style={μ(labelCol, { fontSize:8 })}>RESPONSIBILITIES</span>
+                  <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                    {study.role.split(' · ').map((role, i) => (
+                      <span key={i} style={μ(PALETTE.jaguar[50], { fontSize:9, padding:'4px 10px', background:chipBg, border:`1px solid ${alpha(PALETTE.jaguar[50], 0.12)}` })}>{role.toUpperCase()}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right: Tags + Year (left-aligned) */}
+                <div style={{ background:panelBg, padding:'16px 20px', display:'flex', flexDirection:'column', gap:10 }}>
+                  <span style={μ(labelCol, { fontSize:8 })}>TAGS</span>
+                  <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                    {study.tags.map(tag => (
+                      <Tag key={tag} t={t} onClick={() => onTagClick?.(tag)}>{tag}</Tag>
+                    ))}
+                    <Tag t={t}>2026</Tag>
+                  </div>
+                </div>
+
+              </div>
+            );
+          })()}
+
+          {/* Metric cards */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:1, background:t.border, border:`1px solid ${t.border}`, borderTop:'none', marginTop:0 }}>
+            {study.metrics.map((m, i) => (
+              <div key={i} style={{ background:t.bg, padding:'32px 24px', display:'flex', flexDirection:'column', gap:8 }}>
+                <span style={{ fontFamily:'Big Shoulders Display, Impact, sans-serif', fontSize:'clamp(2rem,5vw,3rem)', fontWeight:900, color:t.text, lineHeight:1 }}>{m.value}</span>
+                <span style={μ(t.accentLabel, { fontSize:9 })}>{m.label}</span>
+              </div>
+            ))}
           </div>
-        </div>
 
-        {/* Tags */}
-        <div style={{ display:'flex', gap:6, marginTop:16 }}>
-          {study.tags.map(tag => (
-            <Tag key={tag} t={t} onClick={() => onTagClick?.(tag)}>{tag}</Tag>
-          ))}
-        </div>
-
-        {/* Hero image slot */}
-        <div style={{ marginTop:48, border:`1px solid ${t.border}`, aspectRatio:'21/9', display:'flex', alignItems:'center', justifyContent:'center', background:t.bgSurface }}>
-          <span style={μ(t.textFaint, { fontSize:10 })}>HERO IMAGE / COVER VISUAL</span>
-        </div>
-
-        {/* Metric cards */}
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:1, background:t.border, border:`1px solid ${t.border}`, marginTop:1 }}>
-          {study.metrics.map((m, i) => (
-            <div key={i} style={{ background:t.bg, padding:'32px 24px', display:'flex', flexDirection:'column', gap:8 }}>
-              <span style={{ fontFamily:'Big Shoulders Display, Impact, sans-serif', fontSize:'clamp(2rem,5vw,3rem)', fontWeight:900, color:t.text, lineHeight:1 }}>{m.value}</span>
-              <span style={μ(t.accentLabel, { fontSize:9 })}>{m.label}</span>
-            </div>
-          ))}
         </div>
       </div>
+
+      {/* ── PAGE BODY ── */}
+      <div style={{ maxWidth:960, margin:'0 auto', padding:'80px 24px 160px' }}>
 
       {/* ── 01 CHALLENGE ── */}
       <section style={{ marginBottom:128 }}>
@@ -945,6 +1010,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => {
         >VISIT KIZUNA <ArrowUpRight size={12} /></a>
       </div>
     </div>
+  </div>
   );
 };
 
