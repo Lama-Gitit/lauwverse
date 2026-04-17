@@ -253,7 +253,7 @@ input[type="range"]::-webkit-slider-thumb {
   position: fixed;
   top: 0; left: 0;
   width: 100%;
-  z-index: 50;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -894,6 +894,151 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 
+/* ── Hamburger button (hidden on desktop) ─────────────────────────────────── */
+.nav__hamburger {
+  display: none; /* shown only in mobile media query below */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.nav__hamburger-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transform-origin: center;
+  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+}
+
+/* Animate to × when open */
+.nav__hamburger--open .nav__hamburger-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav__hamburger--open .nav__hamburger-bar:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+.nav__hamburger--open .nav__hamburger-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ── Mobile menu overlay ──────────────────────────────────────────────────── */
+.mobile-menu {
+  display: none; /* activated in mobile media query */
+  position: fixed;
+  inset: 0;
+  z-index: 90; /* below nav (z-index: 100) */
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 96px 32px 48px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.mobile-menu--open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.mobile-menu__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-menu__link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 16px 0;
+  font-family: var(--font-display, 'Big Shoulders Display', sans-serif);
+  font-size: clamp(56px, 14vw, 96px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  transition: color 0.2s ease;
+}
+
+.mobile-menu__link:hover,
+.mobile-menu__link:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.mobile-menu__footer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mobile-menu__theme-toggle {
+  align-self: flex-start;
+  padding: 10px 20px;
+  background: none;
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--accent-secondary);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.mobile-menu__theme-toggle:hover,
+.mobile-menu__theme-toggle:focus-visible {
+  background: var(--bg-hover);
+  color: var(--accent);
+  outline: none;
+}
+
+.mobile-menu__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-menu__contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.mobile-menu__contact-link:hover,
+.mobile-menu__contact-link:focus-visible {
+  color: var(--text);
+  outline: none;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    RESPONSIVE — Mobile-first breakpoints
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -902,15 +1047,17 @@ input[type="range"]::-webkit-slider-thumb {
   /* ── Nav ── */
   .nav {
     padding: 16px 20px;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 0;
   }
   .nav__links {
-    gap: 12px;
-    flex-wrap: wrap;
+    display: none; /* replaced by mobile-menu overlay */
   }
-  .nav__theme-toggle {
-    display: none;
+  .nav__hamburger {
+    display: flex; /* show on mobile */
+  }
+  .mobile-menu {
+    display: flex; /* activated on mobile */
   }
 
   /* ── Hero ── */

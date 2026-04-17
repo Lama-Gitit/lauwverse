@@ -598,6 +598,7 @@ export default function App() {
 
   const [isScrolling, setIsScrolling] = useState(false);
   const [activeSection, setActiveSection] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const scrollTimerRef = useRef(null);
 
   useEffect(() => {
@@ -644,6 +645,18 @@ export default function App() {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [treeDensityTarget]);
+
+  // Mobile menu — Escape to close + body scroll lock
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e) => { if (e.key === 'Escape') setMobileMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const handleMouseMove = (e) => {
     if (!textRef.current) return;
@@ -725,8 +738,66 @@ export default function App() {
             style={μ(t.accentSecondary)}
           >{t.toggleLabel}</button>
         </div>
+        {/* Hamburger — mobile only */}
+        <button
+          className={`nav__hamburger${mobileMenuOpen ? ' nav__hamburger--open' : ''}`}
+          onClick={() => setMobileMenuOpen(v => !v)}
+          aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-menu"
+        >
+          <span className="nav__hamburger-bar" />
+          <span className="nav__hamburger-bar" />
+          <span className="nav__hamburger-bar" />
+        </button>
       </nav>
       </header>
+
+      {/* ── MOBILE MENU ──────────────────────────────────────────────────── */}
+      <div
+        id="mobile-menu"
+        className={`mobile-menu${mobileMenuOpen ? ' mobile-menu--open' : ''}`}
+        aria-hidden={!mobileMenuOpen}
+        role="dialog"
+        aria-label="Navigation menu"
+      >
+        <nav className="mobile-menu__nav" aria-label="Mobile navigation">
+          {[{ label:'LAB', id:'lab' }, { label:'SIGNAL', id:'signal' }, { label:'ORIGIN', id:'protocol' }].map(({ label, id }) => (
+            <button
+              key={id}
+              className="mobile-menu__link"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' }), 300);
+              }}
+            >{label}</button>
+          ))}
+        </nav>
+        <div className="mobile-menu__footer">
+          <button
+            className="mobile-menu__theme-toggle"
+            onClick={() => setTheme(theme === 'midnight' ? 'primal' : 'midnight')}
+          >
+            {t.toggleLabel}
+          </button>
+          <div className="mobile-menu__contact">
+            <a
+              href="https://twitter.com/lauwverse"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mobile-menu__contact-link"
+            >
+              <Twitter size={14} /> @LAUWVERSE
+            </a>
+            <button className="mobile-menu__contact-link" onClick={copyEmail}>
+              {emailCopied
+                ? <><Check size={14} /> COPIED!</>
+                : <><Mail  size={14} /> HELLO@LAUWVERSE.IO</>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* ── MAIN ─────────────────────────────────────────────────────────── */}
       {page === 'design' ? (
