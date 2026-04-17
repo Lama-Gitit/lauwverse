@@ -105,13 +105,13 @@ export const SectionLabel = ({ filled, outline, tagline, t }) => {
 // ─── SECTION HEADER (shared between CaseStudy + DesignSystem) ────────────────
 // Hoisted to module scope — defining inside a component remounts on every render.
 export const SectionHeader = ({ num, title, sub, t }) => (
-  <div style={{ display:'flex', alignItems:'center', justifyContent: sub ? 'space-between' : 'flex-start', gap:16, marginBottom:48, borderBottom:`1px solid ${t.border}`, paddingBottom:10 }}>
-    <div style={{ display:'flex', alignItems:'baseline', gap:16 }}>
+  <h2 className="cs__section-heading" style={{ display:'flex', alignItems:'center', justifyContent: sub ? 'space-between' : 'flex-start', gap:16, margin:'0 0 48px', borderBottom:`1px solid ${t.border}`, paddingBottom:10 }}>
+    <span style={{ display:'flex', alignItems:'baseline', gap:16 }}>
       <span style={{ ...TYPE.mono.sm, letterSpacing:'0.4em', color:t.accentFaint }}>{num}</span>
-      <span style={{ ...TYPE.mono.sm, fontSize:12, letterSpacing:'0.35em', color:t.text }}>{title}</span>
-    </div>
-    {sub && <span style={{ ...TYPE.mono.sm, fontSize:12, color:t.textFaint }}>{sub}</span>}
-  </div>
+      <span style={{ ...TYPE.mono.sm, letterSpacing:'0.35em', color:t.text }}>{title}</span>
+    </span>
+    {sub && <span style={{ ...TYPE.mono.sm, color:t.textFaint }}>{sub}</span>}
+  </h2>
 );
 
 // ─── HERO BG CANVAS ──────────────────────────────────────────────────────────
@@ -145,12 +145,12 @@ export const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
     if (variant === 'noise') {
       // ── Pre-generate particle field (once) ──────────────────────────────────
       const CELL       = 2;
-      const NUM_LINES  = 8;
+      const NUM_LINES  = 6;
       const LINE_DELAY = 10;     // seconds between each line appearing
       const SWEEP_SECS = 2.5;    // each line sweeps center→outward over this duration
-      const TOP_Y_FRAC = 0.733;  // first line ~80px lower (y≈517 in 705px canvas)
-      const BOT_Y_FRAC = 0.977;  // last line ~16px from bottom border (y≈689)
-      const WIDTH_MIN  = 0.82;   // top line: slightly wider than the responsibilities box (~80%)
+      const TOP_Y_FRAC = 0.79;   // first line ~40px lower than before
+      const BOT_Y_FRAC = 0.977;  // last line ~16px from bottom border
+      const WIDTH_MIN  = 0.50;   // top line: narrow, progressive growth
       const WIDTH_MAX  = 0.96;   // bottom line reaches near canvas edges
 
       const W = c.offsetWidth, H = c.offsetHeight;
@@ -195,7 +195,7 @@ export const HeroBgCanvas = ({ t: theme, variant = 'noise' }) => {
           ctx.fillRect(p.x, p.y, CELL, CELL);
         }
 
-        // Signal lines: top→bottom, i=0 is top (narrow), i=7 is bottom (widest)
+        // Signal lines: top→bottom, i=0 is top (narrow), i=5 is bottom (widest)
         // Each line waits LINE_DELAY*i seconds before sweeping out.
         for (let i = 0; i < NUM_LINES; i++) {
           const lineStart   = i * LINE_DELAY;
