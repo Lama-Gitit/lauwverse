@@ -1,16 +1,74 @@
 import React, { lazy, Suspense, useState, useEffect, useRef } from 'react';
+import { Routes, Route, useNavigate, useParams, Navigate } from 'react-router-dom';
 import './app.css';
 
 import { PALETTE, TYPE, THEMES, alpha, TREE_BLUEPRINT, themeToVars } from './tokens.js';
-import { CASE_STUDIES } from './data.js';
+import { CASE_STUDIES, TAG_GLOSSARY } from './data.js';
+import usePageMeta from './usePageMeta.js';
 import {
   Tag, SectionLabel, GlossaryPanel,
   ArrowRight, ArrowUpRight, Twitter, Mail, Check,
 } from './components/shared.jsx';
 
 // ─── LAZY PAGE ROUTES ─────────────────────────────────────────────────────────
-const CaseStudy  = lazy(() => import('./pages/CaseStudy.jsx'));
+const CaseStudy    = lazy(() => import('./pages/CaseStudy.jsx'));
 const DesignSystem = lazy(() => import('./pages/DesignSystem.jsx'));
+
+// ─── ROUTE WRAPPERS ──────────────────────────────────────────────────────────
+const CaseStudyRoute = ({ t, onTagClick }) => {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const study = CASE_STUDIES[slug];
+  if (!study) return <Navigate to="/" replace />;
+  return (
+    <Suspense fallback={null}>
+      <CaseStudy study={study} t={t} onBack={() => { navigate('/'); window.scrollTo({ top:0 }); }} onTagClick={onTagClick} />
+    </Suspense>
+  );
+};
+
+const DesignSystemRoute = ({ t }) => {
+  const navigate = useNavigate();
+  return (
+    <Suspense fallback={null}>
+      <DesignSystem t={t} onBack={() => navigate('/')} />
+    </Suspense>
+  );
+};
+
+const GlossaryRoute = ({ t }) => {
+  const { tag } = useParams();
+  const navigate = useNavigate();
+  const key = tag?.toUpperCase().replace(/-/g, ' ');
+  const entry = TAG_GLOSSARY[key];
+  usePageMeta({
+    title: entry ? `${entry.title} — Glossary` : 'Not Found',
+    description: entry ? `${entry.tagline} ${entry.body.slice(0, 120)}...` : '',
+    path: `/glossary/${tag}`,
+    jsonLd: entry ? {
+      '@context': 'https://schema.org',
+      '@type': 'DefinedTerm',
+      name: entry.title,
+      description: entry.body,
+      url: `https://lauwverse.vercel.app/glossary/${tag}`,
+    } : undefined,
+  });
+  if (!entry) return <Navigate to="/" replace />;
+  return (
+    <main className="glossary-page animate-in" style={{ maxWidth:640, margin:'120px auto 80px', padding:'0 24px' }}>
+      <button onClick={() => navigate('/')} style={{ ...TYPE.mono.sm, letterSpacing:'0.3em', color:t.textMuted, background:'none', border:'none', cursor:'pointer', marginBottom:40 }}>← RETURN</button>
+      <Tag t={t} size="md">{key}</Tag>
+      <h1 style={{ ...TYPE.heading.lg, color:t.text, marginTop:24, marginBottom:12 }}>{entry.title}</h1>
+      <p style={{ ...TYPE.body.intro, color:t.accent, marginBottom:32 }}>{entry.tagline}</p>
+      <p style={{ ...TYPE.body.md, color:t.textSecondary, lineHeight:1.7 }}>{entry.body}</p>
+      {entry.url && (
+        <a href={entry.url} target="_blank" rel="noopener noreferrer"
+          style={{ ...TYPE.mono.sm, letterSpacing:'0.4em', color:t.accentLabel, marginTop:40, display:'inline-flex', alignItems:'center', gap:10, textDecoration:'none' }}
+        >{entry.title.toUpperCase()} <ArrowUpRight size={12} /></a>
+      )}
+    </main>
+  );
+};
 
 // ─── HERO SCENE (canvas) ──────────────────────────────────────────────────────
 const HeroScene = ({ scrollY, theme, density = 300, fogLevel = 80, fogTopOpacity = 0, fogBottomOpacity = 50 }) => {
@@ -500,7 +558,7 @@ const LAB_FEATURED = [
   {
     title: 'KIZUNA',
     desc: 'Discord-native community intelligence platform. Turns messages, voice hours, and real contribution into automatic recognition through Smart Raffles.',
-    url: '#kizuna',
+    url: '/case/kizuna',
     tags: ['COMMUNITY AI', 'PRODUCT'],
     status: 'LIVE',
     active: true,
@@ -519,17 +577,17 @@ const LAB_FEATURED = [
 
 const LAB_INDEX = [
   { title: 'LAUWVERSE_OS', desc: 'This site. Interactive portfolio, behavioral design playground, and living brand system.', url: '/case/lauwverse-os', tags: ['VIBE_CODE'], status: 'LIVE' },
-  { title: 'BRAND_OS', desc: 'Design token library and interactive primitives powering every Lauwverse surface.', url: '#design', tags: ['DESIGN'], status: 'v1.7' },
+  { title: 'BRAND_OS', desc: 'Design token library and interactive primitives powering every Lauwverse surface.', url: '/design', tags: ['DESIGN'], status: 'v1.7' },
 ];
 
 // ─── LAB CARD (featured, with hover-activated canvas) ────────────────────────
-const LabCard = ({ project, theme, t, onTagClick, onNavigate }) => {
+const LabCard = ({ project, theme, t, onTagClick }) => {
   const [hovered, setHovered] = useState(false);
-  const isInternal = project.url.startsWith('#');
+  const nav = useNavigate();
+  const isInternal = project.url.startsWith('/');
   const handleClick = isInternal ? (e) => {
     e.preventDefault();
-    const slug = project.url.slice(1);
-    onNavigate?.(slug);
+    nav(project.url);
     window.scrollTo({ top:0 });
   } : undefined;
   return (
@@ -577,9 +635,9 @@ const β = (color, extra = {}) => ({ ...TYPE.mono.sm, letterSpacing: '0.5em', co
 
 // ─── APP ─────────────────────────────────────────────────────────────────────
 export default function App() {
+  const navigate = useNavigate();
   const [theme, setTheme]           = useState('midnight');
   const [emailCopied, setEmailCopied] = useState(false);
-  const [page, setPage]             = useState('home');
   const [treeDensityTarget] = useState(() => 200 + Math.floor(Math.random() * 200));
   const [treeDensity, setTreeDensity] = useState(20);
   const fogLevel = 75;
@@ -800,15 +858,11 @@ export default function App() {
       </div>
 
       {/* ── MAIN ─────────────────────────────────────────────────────────── */}
-      {page === 'design' ? (
-        <Suspense fallback={null}>
-          <DesignSystem t={t} onBack={() => setPage('home')} />
-        </Suspense>
-      ) : CASE_STUDIES[page] ? (
-        <Suspense fallback={null}>
-          <CaseStudy study={CASE_STUDIES[page]} t={t} onBack={() => { setPage('home'); window.scrollTo({ top:0 }); }} onTagClick={openGlossary} />
-        </Suspense>
-      ) : (<>
+      <Routes>
+        <Route path="/design" element={<DesignSystemRoute t={t} />} />
+        <Route path="/case/:slug" element={<CaseStudyRoute t={t} onTagClick={openGlossary} />} />
+        <Route path="/glossary/:tag" element={<GlossaryRoute t={t} />} />
+        <Route path="/" element={<>
 
         {/* HERO — full width */}
         <section className="hero animate-in">
@@ -860,18 +914,20 @@ export default function App() {
           {/* Featured — 2-column canvas cards */}
           <div role="list" className="lab__grid">
             {LAB_FEATURED.map(project => (
-              <LabCard key={project.title} project={project} theme={theme} t={t} onTagClick={openGlossary} onNavigate={setPage} />
+              <LabCard key={project.title} project={project} theme={theme} t={t} onTagClick={openGlossary} />
             ))}
           </div>
 
           {/* Index — full-width horizontal bars */}
           <div className="lab__index">
-            {LAB_INDEX.map(project => (
+            {LAB_INDEX.map(project => {
+              const isInternal = project.url.startsWith('/');
+              return (
               <a key={project.title} className="lab__index-item"
-                href={project.url === '#design' ? undefined : project.url}
-                target={project.url.startsWith('http') ? '_blank' : undefined}
-                rel={project.url.startsWith('http') ? 'noopener noreferrer' : undefined}
-                onClick={project.url === '#design' ? (e) => { e.preventDefault(); setPage('design'); window.scrollTo({ top:0 }); } : undefined}
+                href={project.url}
+                target={isInternal ? undefined : '_blank'}
+                rel={isInternal ? undefined : 'noopener noreferrer'}
+                onClick={isInternal ? (e) => { e.preventDefault(); navigate(project.url); window.scrollTo({ top:0 }); } : undefined}
               >
                 <div className="lab__index-info">
                   <h3 style={{ ...TYPE.display.lg, color:t.text, minWidth:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{project.title}</h3>
@@ -884,7 +940,8 @@ export default function App() {
                   <ArrowRight size={14} style={{ color:t.accent }} />
                 </div>
               </a>
-            ))}
+            );
+            })}
           </div>
         </section>
 
@@ -1076,7 +1133,9 @@ export default function App() {
       <footer className="site__footer">
         <span style={μ(t.textMuted)}>SYSTEM_v1.7 // PARAMETERS_STABLE</span>
       </footer>
-      </>)}
+      </>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
 
       {/* Glossary off-canvas */}
       {glossaryTag && <GlossaryPanel tag={glossaryTag} t={t} onClose={closeGlossary} />}

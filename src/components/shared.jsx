@@ -42,7 +42,7 @@ export const GlossaryPanel = ({ tag, t, onClose }) => {
       <aside className="glossary-panel">
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:40 }}>
           <Tag t={t} size="md">{tag}</Tag>
-          <button className="glossary-panel__close" onClick={onClose}
+          <button className="glossary-panel__close" onClick={onClose} aria-label="Close glossary panel"
             style={{ ...TYPE.mono.sm, letterSpacing:'0.3em', color:t.textMuted, background:'none', border:'none', cursor:'crosshair' }}
           >CLOSE ×</button>
         </div>

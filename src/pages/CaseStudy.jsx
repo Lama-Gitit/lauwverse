@@ -1,5 +1,6 @@
 import { PALETTE, alpha } from '../tokens.js';
 import { Tag, SectionHeader, HeroBgCanvas, ArrowUpRight } from '../components/shared.jsx';
+import usePageMeta from '../usePageMeta.js';
 
 // ── Panel: fixed palette values for WCAG AA on jaguar[700] surface ───────────
 // These are NOT theme-dependent — the panel always uses the deep-purple bg
@@ -14,7 +15,21 @@ const PANEL_VARS  = {
 };
 
 /** @param {{ study: import('../data.js').CaseStudy, t: import('../tokens.js').Theme, onBack: Function, onTagClick?: Function }} props */
-const CaseStudy = ({ study, t, onBack, onTagClick }) => (
+const CaseStudy = ({ study, t, onBack, onTagClick }) => {
+  usePageMeta({
+    title: `${study.headline.filled.replace('.', '')} — Case Study`,
+    description: study.subline,
+    path: `/case/${study.slug}`,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      name: study.headline.filled,
+      description: study.subline,
+      url: `https://lauwverse.vercel.app/case/${study.slug}`,
+      author: { '@type': 'Person', name: 'Laurens', alternateName: 'Lauwverse' },
+    },
+  });
+  return (
   <main className="cs animate-in">
 
     {/* ── HERO ── */}
@@ -195,6 +210,7 @@ const CaseStudy = ({ study, t, onBack, onTagClick }) => (
 
     </div>
   </main>
-);
+  );
+};
 
 export default CaseStudy;

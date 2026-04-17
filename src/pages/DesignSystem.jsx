@@ -1,5 +1,6 @@
 import { PALETTE, THEMES, TYPE, alpha, contrastText } from '../tokens.js';
 import { Tag, SectionHeader, SectionLabel, StatusBadge, ExternalLink } from '../components/shared.jsx';
+import usePageMeta from '../usePageMeta.js';
 
 // ── Static data (module-scope — created once, not per render) ─────────────────
 const HEADING_WEIGHTS = [
@@ -85,7 +86,13 @@ const GRID_PROPS = [
 ];
 
 /** @param {{ t: import('../tokens.js').Theme, onBack: Function }} props */
-const DesignSystem = ({ t, onBack }) => (
+const DesignSystem = ({ t, onBack }) => {
+  usePageMeta({
+    title: 'Brand OS — Design System',
+    description: 'Design token library and interactive primitives powering every Lauwverse surface. Typography, color, components, and layout.',
+    path: '/design',
+  });
+  return (
   <main className="ds__page animate-in">
 
     {/* ── PAGE HEADER ── */}
@@ -477,6 +484,7 @@ const DesignSystem = ({ t, onBack }) => (
     </section>
 
   </main>
-);
+  );
+};
 
 export default DesignSystem;
