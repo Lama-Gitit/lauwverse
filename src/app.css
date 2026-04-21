@@ -412,7 +412,8 @@ input[type="range"]::-webkit-slider-thumb {
   height: 100%;
   border: 1px solid var(--border);
   transform: translate(6px, 6px);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  opacity: 0;
+  transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
   pointer-events: none;
   z-index: 0;
 }
@@ -425,6 +426,7 @@ input[type="range"]::-webkit-slider-thumb {
 .hero__cta--primary:hover .hero__cta-shadow {
   transform: translate(10px, 10px);
   border-color: var(--border-strong);
+  opacity: 1;
 }
 
 /* Secondary: arrow link. Typography comes from TYPE.mono.sm inline. */
@@ -744,7 +746,10 @@ input[type="range"]::-webkit-slider-thumb {
 .lineage__list {
   display: flex;
   flex-direction: column;
+  gap: 1px;
   list-style: none;
+  background: var(--border);
+  border: 1px solid var(--border);
 }
 
 .lineage__item {
@@ -752,11 +757,11 @@ input[type="range"]::-webkit-slider-thumb {
   align-items: center;
   justify-content: space-between;
   padding: 44px 16px;
+  background: var(--bg);
   cursor: crosshair;
   flex-wrap: wrap;
   gap: 16px;
   border-left: 2px solid transparent;
-  border-bottom: 1px solid var(--border);
   transition: background 0.2s, border-left-color 0.2s;
 }
 
