@@ -685,7 +685,7 @@ export default function App() {
       observers.push(observer);
     });
     return () => observers.forEach(o => o.disconnect());
-  }, [page]);
+  }, []);
 
   // Animate tree density from sparse → target over ~30 seconds (feels alive)
   useEffect(() => {
