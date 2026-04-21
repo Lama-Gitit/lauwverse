@@ -105,12 +105,12 @@ export const SectionLabel = ({ filled, outline, tagline, t }) => {
 // ─── SECTION HEADER (shared between CaseStudy + DesignSystem) ────────────────
 // Hoisted to module scope — defining inside a component remounts on every render.
 export const SectionHeader = ({ num, title, sub, t }) => (
-  <h2 className="cs__section-heading" style={{ display:'flex', alignItems:'center', justifyContent: sub ? 'space-between' : 'flex-start', gap:16, margin:'0 0 48px', borderBottom:`1px solid ${t.border}`, paddingBottom:10 }}>
-    <span style={{ display:'flex', alignItems:'baseline', gap:16 }}>
-      <span style={{ ...TYPE.mono.sm, letterSpacing:'0.4em', color:t.accentFaint }}>{num}</span>
-      <span style={{ ...TYPE.mono.sm, letterSpacing:'0.35em', color:t.text }}>{title}</span>
+  <h2 className="cs__section-heading" style={{ display:'flex', alignItems:'flex-end', justifyContent: sub ? 'space-between' : 'flex-start', gap:16, margin:'0 0 48px', borderBottom:`1px solid ${t.border}`, paddingBottom:16 }}>
+    <span style={{ display:'flex', alignItems:'baseline', gap:20, flexWrap:'wrap' }}>
+      <span style={{ ...TYPE.numeral.xl, color:t.accentFaint }}>{num}</span>
+      <span style={{ ...TYPE.display.xl, color:t.text }}>{title}</span>
     </span>
-    {sub && <span style={{ ...TYPE.mono.sm, color:t.textFaint }}>{sub}</span>}
+    {sub && <span style={{ ...TYPE.mono.sm, color:t.textFaint, flexShrink:0 }}>{sub}</span>}
   </h2>
 );
 

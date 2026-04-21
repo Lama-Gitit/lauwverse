@@ -1213,7 +1213,7 @@ input[type="range"]::-webkit-slider-thumb {
   font-weight: 900;
   font-style: italic;
   text-transform: uppercase;
-  letter-spacing: -0.07em;
+  letter-spacing: -0.03em;
   margin: 0;
 }
 
@@ -1241,18 +1241,18 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__subline-main {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  font-weight: 300;
-  letter-spacing: 0.35em;
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--text);
 }
 
 .cs__subline-for {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--text-secondary);
   margin-left: 8px;
@@ -1260,9 +1260,9 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__visit-link {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--accent);
   text-decoration: none;
@@ -1296,9 +1296,9 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__meta-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 8px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
 }
 
@@ -1328,17 +1328,19 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__metric-value {
   font-family: 'Big Shoulders Display', Impact, sans-serif;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
   color: var(--text);
-  line-height: 1;
+  line-height: 0.95;
 }
 
 .cs__metric-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--accent-label);
 }
@@ -1370,7 +1372,7 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 1rem;
   font-weight: 400;
   color: var(--text);
-  line-height: 1.8;
+  line-height: 1.7;
   margin: 0;
 }
 
@@ -1421,7 +1423,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__img-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 300;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -1450,9 +1452,9 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__feature-name {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--accent-label);
 }
@@ -1462,7 +1464,7 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 0.875rem;
   font-weight: 300;
   color: var(--text);
-  line-height: 1.7;
+  line-height: 1.6;
   margin: 0;
 }
 
@@ -1480,9 +1482,9 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__craft-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--accent-faint);
   display: block;
@@ -1511,21 +1513,21 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .cs__process-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
   color: var(--accent-faint);
   flex-shrink: 0;
-  width: 24px;
+  width: 40px;
 }
 
 .cs__process-phase {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--text);
   display: block;
@@ -1540,9 +1542,9 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__aha-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--accent-faint);
   display: block;
@@ -1586,12 +1588,14 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .cs__impact-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
   color: var(--accent-faint);
+  flex-shrink: 0;
+  width: 40px;
 }
 
 .cs__impact-text {
@@ -1609,9 +1613,9 @@ input[type="range"]::-webkit-slider-thumb {
 
 .cs__reflection-label {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 0.75rem;
   font-weight: 300;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--accent-faint);
   margin-bottom: 12px;
