@@ -577,7 +577,6 @@ const LAB_FEATURED = [
 
 const LAB_INDEX = [
   { title: 'LAUWVERSE_OS', desc: 'This site. Interactive portfolio, behavioral design playground, and living brand system.', url: '/case/lauwverse-os', tags: ['VIBE_CODE'], status: 'LIVE' },
-  { title: 'BRAND_OS', desc: 'Design token library and interactive primitives powering every Lauwverse surface.', url: '/design', tags: ['DESIGN'], status: 'v1.7' },
 ];
 
 // ─── LAB CARD (featured, with hover-activated canvas) ────────────────────────
@@ -741,9 +740,6 @@ export default function App() {
     { date: '12.APR', title: 'Kizuna_v2_Spec_Sprint',            type: 'BUILD',    source: 'Kizuna',       note: 'Smart Raffles v2 and contribution signal tuning.',               link: null },
     { date: '04.APR', title: 'Lauwverse_Portfolio_Rebuild',      type: 'BUILD',    source: 'Self',         note: 'New hero, expanded Lab, full SEO + GEO pass.',                  link: null },
     { date: '01.APR', title: 'Claude_Code_Skills_Architecture',  type: 'READING',  source: 'Anthropic Docs', note: 'How Claude Code skill injection works under the hood.',        link: null },
-    { date: '28.MAR', title: 'Agentic_Interface_Sprint',         type: 'BUILD',    source: 'Kizuna',       note: 'Designing for AI agents as first-class users.',                 link: null },
-    { date: '25.MAR', title: 'Community_Signal_Processing',      type: 'THINKING', source: 'Research',     note: 'What real contribution looks like vs. what gets counted.',      link: null },
-    { date: '22.MAR', title: 'Neural_Design_Tokens_v2',          type: 'BUILD',    source: 'Brand OS',     note: 'Semantic token architecture for dual-theme systems.',           link: null },
   ];
 
   const signalTypes = ['ALL', 'BUILD', 'READING', 'THINKING'];
@@ -953,13 +949,7 @@ export default function App() {
           <div className="signal__filters">
             {signalTypes.map(type => (
               <button key={type} className="signal__filter-btn"
-                onClick={(e) => {
-                  setSignalFilter(type);
-                  const parent = e.currentTarget.parentElement;
-                  parent.classList.remove('filter-glitch');
-                  void parent.offsetWidth;
-                  parent.classList.add('filter-glitch');
-                }}
+                onClick={() => setSignalFilter(type)}
                 style={{
                   ...TYPE.mono.sm, fontSize:'0.625rem', letterSpacing:'0.25em',
                   color: signalFilter === type ? t.text : t.textFaint,
